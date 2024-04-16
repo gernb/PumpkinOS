@@ -56,7 +56,6 @@ struct WindowProvider {
                 }
             }
         }
-        print(keyPress)
         switch keyPress.phase {
         case .down, .repeat:
             inputEvents.append(.keyDown(code))
@@ -92,12 +91,14 @@ struct WindowProvider {
         software: Int32,
         dataPtr: UnsafeMutableRawPointer?
     ) -> UnsafeMutablePointer<window_t?>? {
+        let width = widthPtr?.pointee ?? 0
+        let height = heightPtr?.pointee ?? 0
         let window = Window(
             encoding: encoding,
-            width: widthPtr?.pointee ?? 0,
-            height: heightPtr?.pointee ?? 0
+            width: width,
+            height: height
         )
-        Logger.wp.debug("Create window: \(window.id)")
+        Logger.wp.debug("Create window: \(window.id); encoding=\(encoding), width=\(width), height=\(height)")
         publisher?.yield(.createWindow(window))
         return Unmanaged.passRetained(window).toOpaque().assumingMemoryBound(to: window_t?.self)
     }

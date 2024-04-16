@@ -32,6 +32,9 @@
 		44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B75B2BCDE4B90043DD3E /* Logging.swift */; };
 		44D8F6492BCE99E600E3127F /* PumpkinVFS in Copy VFS */ = {isa = PBXBuildFile; fileRef = 44D8F6482BCE991C00E3127F /* PumpkinVFS */; };
 		44D8F6562BCEB8B400E3127F /* WindowProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D8F6552BCEB8B400E3127F /* WindowProvider.swift */; };
+		44D8F6582BCF260400E3127F /* PalmOS in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6572BCF260400E3127F /* PalmOS */; };
+		44D8F65A2BCF262700E3127F /* Preferences in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6592BCF262700E3127F /* Preferences */; };
+		44D8F66A2BCF294300E3127F /* Command in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6692BCF294300E3127F /* Command */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -140,6 +143,76 @@
 			remoteGlobalIDString = 44D8F64B2BCEAA3B00E3127F;
 			remoteInfo = Boot;
 		};
+		44D8F65F2BCF269D00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44D8F6612BCF269D00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7202BCDD4CF0043DD3E;
+			remoteInfo = libpumpkin;
+		};
+		44D8F6632BCF269D00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B6F32BCDC4DF0043DD3E;
+			remoteInfo = pilrc;
+		};
+		44D8F6652BCF269D00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7022BCDCF190043DD3E;
+			remoteInfo = prcbuild;
+		};
+		44D8F6672BCF26DB00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44D8F65B2BCF268F00E3127F;
+			remoteInfo = Preferences;
+		};
+		44D8F66F2BCF297A00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44D8F6712BCF297A00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7202BCDD4CF0043DD3E;
+			remoteInfo = libpumpkin;
+		};
+		44D8F6732BCF297A00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B6F32BCDC4DF0043DD3E;
+			remoteInfo = pilrc;
+		};
+		44D8F6752BCF297A00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7022BCDCF190043DD3E;
+			remoteInfo = prcbuild;
+		};
+		44D8F6772BCF29AD00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44D8F66B2BCF296F00E3127F;
+			remoteInfo = Command;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -203,6 +276,9 @@
 		44D8F6482BCE991C00E3127F /* PumpkinVFS */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PumpkinVFS; sourceTree = "<group>"; };
 		44D8F64A2BCEA9FC00E3127F /* BOOT */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BOOT; path = ../BOOT; sourceTree = "<group>"; };
 		44D8F6552BCEB8B400E3127F /* WindowProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowProvider.swift; sourceTree = "<group>"; };
+		44D8F6572BCF260400E3127F /* PalmOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PalmOS; path = ../PalmOS; sourceTree = "<group>"; };
+		44D8F6592BCF262700E3127F /* Preferences */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Preferences; path = ../Preferences; sourceTree = "<group>"; };
+		44D8F6692BCF294300E3127F /* Command */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Command; path = ../Command; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -225,8 +301,11 @@
 				442E5C8D2BCDE7E600E4445D /* swiftlint.sh */,
 				44C5B7002BCDC8250043DD3E /* common.mak */,
 				44C5B6FF2BCDC80E0043DD3E /* commonp.mak */,
+				44D8F6692BCF294300E3127F /* Command */,
+				44D8F6592BCF262700E3127F /* Preferences */,
 				44D8F6312BCE31B000E3127F /* Launcher */,
 				44D8F64A2BCEA9FC00E3127F /* BOOT */,
+				44D8F6572BCF260400E3127F /* PalmOS */,
 				44C5B7282BCDD5810043DD3E /* libos */,
 				44C5B71F2BCDD4960043DD3E /* libpumpkin */,
 				44C5B70C2BCDD2E90043DD3E /* lua */,
@@ -414,6 +493,42 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = Boot;
 		};
+		44D8F65B2BCF268F00E3127F /* Preferences */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44D8F65C2BCF268F00E3127F /* Build configuration list for PBXLegacyTarget "Preferences" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../Preferences;
+			dependencies = (
+				44D8F6602BCF269D00E3127F /* PBXTargetDependency */,
+				44D8F6622BCF269D00E3127F /* PBXTargetDependency */,
+				44D8F6642BCF269D00E3127F /* PBXTargetDependency */,
+				44D8F6662BCF269D00E3127F /* PBXTargetDependency */,
+			);
+			name = Preferences;
+			passBuildSettingsInEnvironment = 1;
+			productName = Preferences;
+		};
+		44D8F66B2BCF296F00E3127F /* Command */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44D8F66C2BCF296F00E3127F /* Build configuration list for PBXLegacyTarget "Command" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../Command;
+			dependencies = (
+				44D8F6702BCF297A00E3127F /* PBXTargetDependency */,
+				44D8F6722BCF297A00E3127F /* PBXTargetDependency */,
+				44D8F6742BCF297A00E3127F /* PBXTargetDependency */,
+				44D8F6762BCF297A00E3127F /* PBXTargetDependency */,
+			);
+			name = Command;
+			passBuildSettingsInEnvironment = 1;
+			productName = Command;
+		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
@@ -431,6 +546,8 @@
 			buildRules = (
 			);
 			dependencies = (
+				44D8F6782BCF29AD00E3127F /* PBXTargetDependency */,
+				44D8F6682BCF26DB00E3127F /* PBXTargetDependency */,
 				44D8F6542BCEAA9800E3127F /* PBXTargetDependency */,
 				44D8F6372BCE327E00E3127F /* PBXTargetDependency */,
 				442E5C962BCE068B00E4445D /* PBXTargetDependency */,
@@ -483,6 +600,12 @@
 					44D8F64B2BCEAA3B00E3127F = {
 						CreatedOnToolsVersion = 15.3;
 					};
+					44D8F65B2BCF268F00E3127F = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44D8F66B2BCF296F00E3127F = {
+						CreatedOnToolsVersion = 15.3;
+					};
 				};
 			};
 			buildConfigurationList = 44C5B6F02BCDC4570043DD3E /* Build configuration list for PBXProject "PumpkinOS" */;
@@ -508,6 +631,8 @@
 				44C5B7292BCDD59C0043DD3E /* libos */,
 				44D8F6322BCE322B00E3127F /* Launcher */,
 				44D8F64B2BCEAA3B00E3127F /* Boot */,
+				44D8F65B2BCF268F00E3127F /* Preferences */,
+				44D8F66B2BCF296F00E3127F /* Command */,
 			);
 		};
 /* End PBXProject section */
@@ -518,7 +643,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				44C5B7462BCDDA870043DD3E /* Assets.xcassets in Resources */,
+				44D8F66A2BCF294300E3127F /* Command in Resources */,
+				44D8F65A2BCF262700E3127F /* Preferences in Resources */,
 				44C5B75A2BCDE4680043DD3E /* main.lua in Resources */,
+				44D8F6582BCF260400E3127F /* PalmOS in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,6 +782,56 @@
 			isa = PBXTargetDependency;
 			target = 44D8F64B2BCEAA3B00E3127F /* Boot */;
 			targetProxy = 44D8F6532BCEAA9800E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6602BCF269D00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44D8F65F2BCF269D00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6622BCF269D00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7202BCDD4CF0043DD3E /* libpumpkin */;
+			targetProxy = 44D8F6612BCF269D00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6642BCF269D00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B6F32BCDC4DF0043DD3E /* pilrc */;
+			targetProxy = 44D8F6632BCF269D00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6662BCF269D00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7022BCDCF190043DD3E /* prcbuild */;
+			targetProxy = 44D8F6652BCF269D00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6682BCF26DB00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44D8F65B2BCF268F00E3127F /* Preferences */;
+			targetProxy = 44D8F6672BCF26DB00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6702BCF297A00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44D8F66F2BCF297A00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6722BCF297A00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7202BCDD4CF0043DD3E /* libpumpkin */;
+			targetProxy = 44D8F6712BCF297A00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6742BCF297A00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B6F32BCDC4DF0043DD3E /* pilrc */;
+			targetProxy = 44D8F6732BCF297A00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6762BCF297A00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7022BCDCF190043DD3E /* prcbuild */;
+			targetProxy = 44D8F6752BCF297A00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6782BCF29AD00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44D8F66B2BCF296F00E3127F /* Command */;
+			targetProxy = 44D8F6772BCF29AD00E3127F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -810,6 +988,34 @@
 			};
 			name = Release;
 		};
+		44D8F65D2BCF268F00E3127F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44D8F65E2BCF268F00E3127F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44D8F66D2BCF296F00E3127F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44D8F66E2BCF296F00E3127F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -908,6 +1114,24 @@
 			buildConfigurations = (
 				44D8F64D2BCEAA3B00E3127F /* Debug */,
 				44D8F64E2BCEAA3B00E3127F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44D8F65C2BCF268F00E3127F /* Build configuration list for PBXLegacyTarget "Preferences" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44D8F65D2BCF268F00E3127F /* Debug */,
+				44D8F65E2BCF268F00E3127F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44D8F66C2BCF296F00E3127F /* Build configuration list for PBXLegacyTarget "Command" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44D8F66D2BCF296F00E3127F /* Debug */,
+				44D8F66E2BCF296F00E3127F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
