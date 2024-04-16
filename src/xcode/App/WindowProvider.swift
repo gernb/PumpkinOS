@@ -22,14 +22,21 @@ struct WindowProvider {
         case mouseDown
         case mouseUp
         case mouseMove(x: Int32, y: Int32)
+        case stop
     }
 
-    static var events: AsyncStream<Event>?
+    static var events: AsyncSharedStream<Event>?
     private static var publisher: AsyncStream<Event>.Continuation?
     private static var inputEvents: [Input] = []
 
     static func initialize() {
-        (self.events, self.publisher) = AsyncStream<Event>.makeStream()
+        let (events, publisher) = AsyncStream<Event>.makeStream()
+        self.events = .init(events)
+        self.publisher = publisher
+    }
+
+    static func reset() {
+        inputEvents.removeAll()
     }
 
     static func keyEvent(_ keyPress: KeyPress) {
@@ -80,6 +87,10 @@ struct WindowProvider {
         inputEvents.append(.mouseUp)
     }
 
+    static func stop() {
+        inputEvents.append(.stop)
+    }
+
     static func create(
         encoding: Int32,
         widthPtr: UnsafeMutablePointer<Int32>?,
@@ -121,6 +132,7 @@ struct WindowProvider {
         let window: Window = Unmanaged.fromOpaque(UnsafeRawPointer(windowPtr)).takeUnretainedValue()
         let title = String(cString: titlePtr)
         Logger.wp.debug("Title window: \(window.id); '\(title)'")
+        window.title = title
         publisher?.yield(.setTitle(window, title))
     }
 
@@ -286,6 +298,8 @@ struct WindowProvider {
             arg1Ptr?.pointee = 1
             arg2Ptr?.pointee = 0
             return WINDOW_BUTTONUP
+        case .stop:
+            return -1
         }
     }
 
@@ -294,6 +308,7 @@ struct WindowProvider {
         let encoding: Int32
         let width: Int32
         let height: Int32
+        var title: String?
         let size: Int
         var buffer: [UInt8]
 

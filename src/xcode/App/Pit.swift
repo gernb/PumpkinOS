@@ -10,7 +10,8 @@ import OSLog
 
 @Observable
 final class Pit: Sendable {
-    let logLines: AsyncStream<LogLine>
+    private(set) var logId = UUID()
+    private(set) var logLines: AsyncStream<LogLine>?
     @MainActor private(set) var running = false
 
     private var mainLoopTask: Task<Void, Never>?
@@ -38,6 +39,7 @@ final class Pit: Sendable {
     )
 
     enum Constants {
+        static let tempScript = URL.temporaryDirectory.appending(path: "main.lua")
         static let libraryDir = URL.libraryDirectory.appending(path: Bundle.main.bundleIdentifier!)
         static let vfsUrl = libraryDir.appending(path: "vfs/") // The trailing / is necessary
         static let cachesDir =  URL.cachesDirectory.appending(path: Bundle.main.bundleIdentifier!)
@@ -45,6 +47,90 @@ final class Pit: Sendable {
     }
 
     init() {
+        self.createVFSDirectory()
+    }
+
+    deinit {
+        mainLoopTask?.cancel()
+    }
+
+    @MainActor
+    func main(debugLevel: Int = 1, width: Int = 320, height: Int = 320) {
+        guard
+            let templateURL = Bundle.main.url(forResource: "main", withExtension: "lua"),
+            let template = try? String(contentsOf: templateURL)
+        else {
+            Logger.default.critical("Failed to get script template")
+            return
+        }
+        let script = template
+            .replacingOccurrences(of: "{width}", with: "\(width)")
+            .replacingOccurrences(of: "{height}", with: "\(height)")
+        do {
+            try script.write(to: Constants.tempScript, atomically: true, encoding: .utf8)
+        } catch {
+            Logger.default.critical("Failed to write lua script: \(String(describing: error), privacy: .public)")
+            return
+        }
+        WindowProvider.reset()
+        running = true
+        createLogStream()
+        mainLoopTask = Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
+            let args = ["app", "-d", "\(debugLevel)", "-f", Constants.logUrl.path, "-s", "libscriptlua.so", Constants.tempScript.path]
+            var cargs = args.map { strdup($0) }
+            defer { cargs.forEach { free($0) } }
+            let result = pit_main(
+                Int32(args.count),
+                &cargs,
+                { Pit.mainCallback(enginePtr: $0, data: $1) },
+                Unmanaged.passUnretained(self).toOpaque()
+            )
+            if result != 0 {
+                Logger.default.critical("pit_main returned error status: \(result)")
+            }
+            Task { @MainActor [weak self] in
+                self?.running = false
+            }
+        }
+    }
+
+    @MainActor
+    func stop() async {
+        WindowProvider.stop()
+        try? await Task.sleep(for: .milliseconds(500))
+        mainLoopTask?.cancel()
+        mainLoopTask = nil
+        running = false
+    }
+
+    private static func mainCallback(enginePtr: Int32, data: UnsafeMutableRawPointer?) {
+        guard let data else { return }
+        let instance: Pit = Unmanaged.fromOpaque(data).takeUnretainedValue()
+        instance.mountVFS()
+        instance.registerWindowProvider(enginePtr: enginePtr)
+    }
+
+    private func mountVFS() {
+        let local = strdup(Constants.vfsUrl.path())
+        let virtual = strdup("/")
+        if vfs_local_mount(local, virtual) != 0 {
+            Logger.default.critical("Failed to mount virtual file system")
+        }
+        free(virtual)
+        free(local)
+    }
+
+    private func registerWindowProvider(enginePtr: Int32) {
+        let cStr = strdup(WINDOW_PROVIDER)
+        if script_set_pointer(enginePtr, cStr, &Self.wp) != 0 {
+            Logger.default.critical("Failed to register window provider")
+        }
+        free(cStr)
+    }
+
+    @MainActor
+    private func createLogStream() {
         self.logLines = .init { publisher in
             try? FileManager.default.createDirectory(at: Constants.cachesDir, withIntermediateDirectories: true)
             try? "".write(to: Constants.logUrl, atomically: true, encoding: .utf8)
@@ -78,72 +164,7 @@ final class Pit: Sendable {
             }
             source.resume()
         }
-        self.createVFSDirectory()
-    }
-
-    deinit {
-        mainLoopTask?.cancel()
-    }
-
-    @MainActor
-    func main(debugLevel: Int = 1, script: String = "main.lua") {
-        guard let scriptPath = Bundle.main.path(forResource: script, ofType: nil) else {
-            Logger.default.critical("Failed to get path for script: \(script, privacy: .public)")
-            return
-        }
-        running = true
-        mainLoopTask = Task.detached(priority: .userInitiated) { [weak self] in
-            guard let self else { return }
-            let args = ["app", "-d", "\(debugLevel)", "-f", Constants.logUrl.path, "-s", "libscriptlua.so", scriptPath]
-            var cargs = args.map { strdup($0) }
-            defer { cargs.forEach { free($0) } }
-            let result = pit_main(
-                Int32(args.count),
-                &cargs,
-                { Pit.mainCallback(enginePtr: $0, data: $1) },
-                Unmanaged.passUnretained(self).toOpaque()
-            )
-            if result != 0 {
-                Logger.default.critical("pit_main returned error status: \(result)")
-            }
-            Task { @MainActor [weak self] in
-                self?.running = false
-            }
-        }
-    }
-
-    @MainActor
-    func stop(status: Int32 = 0) async {
-        sys_set_finish(status)
-        try? await Task.sleep(for: .milliseconds(500))
-        mainLoopTask?.cancel()
-        mainLoopTask = nil
-        running = false
-    }
-
-    private static func mainCallback(enginePtr: Int32, data: UnsafeMutableRawPointer?) {
-        guard let data else { return }
-        let instance: Pit = Unmanaged.fromOpaque(data).takeUnretainedValue()
-        instance.mountVFS()
-        instance.registerWindowProvider(enginePtr: enginePtr)
-    }
-
-    private func mountVFS() {
-        let local = strdup(Constants.vfsUrl.path())
-        let virtual = strdup("/")
-        if vfs_local_mount(local, virtual) != 0 {
-            Logger.default.critical("Failed to mount virtual file system")
-        }
-        free(virtual)
-        free(local)
-    }
-
-    private func registerWindowProvider(enginePtr: Int32) {
-        let cStr = strdup(WINDOW_PROVIDER)
-        if script_set_pointer(enginePtr, cStr, &Self.wp) != 0 {
-            Logger.default.critical("Failed to register window provider")
-        }
-        free(cStr)
+        self.logId = .init()
     }
 
     private func createVFSDirectory() {

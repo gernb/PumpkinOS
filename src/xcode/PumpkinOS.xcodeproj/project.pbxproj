@@ -35,6 +35,8 @@
 		44D8F6582BCF260400E3127F /* PalmOS in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6572BCF260400E3127F /* PalmOS */; };
 		44D8F65A2BCF262700E3127F /* Preferences in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6592BCF262700E3127F /* Preferences */; };
 		44D8F66A2BCF294300E3127F /* Command in Resources */ = {isa = PBXBuildFile; fileRef = 44D8F6692BCF294300E3127F /* Command */; };
+		44D8F67A2BCF362C00E3127F /* DeviceWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D8F6792BCF362C00E3127F /* DeviceWindow.swift */; };
+		44D8F67C2BCF3B0B00E3127F /* AsyncSharedStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D8F67B2BCF3B0B00E3127F /* AsyncSharedStream.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -279,6 +281,8 @@
 		44D8F6572BCF260400E3127F /* PalmOS */ = {isa = PBXFileReference; lastKnownFileType = folder; name = PalmOS; path = ../PalmOS; sourceTree = "<group>"; };
 		44D8F6592BCF262700E3127F /* Preferences */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Preferences; path = ../Preferences; sourceTree = "<group>"; };
 		44D8F6692BCF294300E3127F /* Command */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Command; path = ../Command; sourceTree = "<group>"; };
+		44D8F6792BCF362C00E3127F /* DeviceWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceWindow.swift; sourceTree = "<group>"; };
+		44D8F67B2BCF3B0B00E3127F /* AsyncSharedStream.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncSharedStream.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -349,7 +353,9 @@
 				44C5B7532BCDDEC40043DD3E /* App-Bridging-Header.h */,
 				44C5B7382BCDD8B90043DD3E /* main.lua */,
 				44C5B7412BCDDA850043DD3E /* App.swift */,
+				44D8F67B2BCF3B0B00E3127F /* AsyncSharedStream.swift */,
 				44C5B7432BCDDA850043DD3E /* ContentView.swift */,
+				44D8F6792BCF362C00E3127F /* DeviceWindow.swift */,
 				44C5B75B2BCDE4B90043DD3E /* Logging.swift */,
 				442E5C9B2BCE114B00E4445D /* Pit.swift */,
 				44D8F6552BCEB8B400E3127F /* WindowProvider.swift */,
@@ -699,7 +705,9 @@
 			files = (
 				44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */,
 				44D8F6562BCEB8B400E3127F /* WindowProvider.swift in Sources */,
+				44D8F67C2BCF3B0B00E3127F /* AsyncSharedStream.swift in Sources */,
 				442E5C9C2BCE114B00E4445D /* Pit.swift in Sources */,
+				44D8F67A2BCF362C00E3127F /* DeviceWindow.swift in Sources */,
 				44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */,
 				44C5B7422BCDDA850043DD3E /* App.swift in Sources */,
 			);

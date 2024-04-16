@@ -7,104 +7,107 @@
 import SwiftUI
 
 struct ContentView: View {
-    private let pit = Pit()
+    enum LogLevel: Int, CaseIterable {
+        case error, info, debug
+
+        var label: String {
+            switch self {
+            case .debug: "Debug"
+            case .info: "Info"
+            case .error: "Error"
+            }
+        }
+    }
+
+    @AppStorage("logLevel") private var logLevel = LogLevel.info
+    @AppStorage("width") private var width: Int = 1024
+    @AppStorage("height") private var height: Int = 600
     @State private var logLines: [LogLine] = []
-    @State private var title = ""
-    @State private var mainWindow = Image(systemName: "xmark")
-    @State private var isDragging = false
-    @FocusState private var mainWindowFocused
+
+    @Environment(Pit.self) private var pit
+    @Environment(\.openWindow) private var openWindow
+    @Environment(\.dismissWindow) private var dismissWindow
 
     var body: some View {
-        HStack {
-            VStack {
-                HStack {
-                    if pit.running {
-                        Button("Stop") {
-                            Task {
-                                await pit.stop()
-                            }
-                        }
-                    } else {
-                        Button("Start") {
-                            pit.main()
-                        }
+        VStack {
+            HStack {
+                Picker("Logging level:", selection: $logLevel) {
+                    ForEach(LogLevel.allCases, id: \.self) { level in
+                        Text(level.label).tag(level)
                     }
                 }
-                .buttonStyle(.bordered)
-                ScrollView {
-                    VStack {
-                        ForEach(logLines) { line in
-                            Text(line.message)
-                                .foregroundStyle(line.level.style)
-                        }
-                        .fontDesign(.monospaced)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                .frame(maxWidth: 200)
+                .disabled(pit.running)
+                LabeledContent("Width:") {
+                    TextField("Width", value: $width, format: .number, prompt: Text("Width"))
                 }
-                .focusable()
-                .defaultScrollAnchor(.bottom)
-            }
+                .frame(maxWidth: 200)
+                .disabled(pit.running)
+                LabeledContent("Height:") {
+                    TextField("Height", value: $height, format: .number, prompt: Text("Height"))
+                }
+                .frame(maxWidth: 200)
+                .disabled(pit.running)
 
-            VStack(alignment: .leading) {
-                Text(title)
-                    .frame(width: 320, alignment: .leading)
-                mainWindow
-                    .frame(width: 320, height: 320)
-                    .focusable()
-                    .focusEffectDisabled()
-                    .focused($mainWindowFocused)
-                    .gesture(
-                        DragGesture(minimumDistance: 0)
-                            .onChanged { event in
-                                if isDragging {
-                                    WindowProvider.mouseMove(to: event.location)
-                                } else {
-                                    WindowProvider.mouseDown(at: event.location)
-                                    isDragging = true
-                                }
-                            }
-                            .onEnded { event in
-                                WindowProvider.mouseUp(at: event.location)
-                                isDragging = false
-                            }
-                    )
-                    .onKeyPress(phases: .all) { keyPress in
-                        WindowProvider.keyEvent(keyPress)
-                        return .handled
+                Spacer()
+
+                if pit.running {
+                    Button("Stop") {
+                        Task {
+                            await pit.stop()
+                        }
                     }
-                    .padding()
-                    .border(.secondary)
+                } else {
+                    Button("Start") {
+                        pit.main(debugLevel: logLevel.rawValue, width: width, height: height)
+                    }
+                }
             }
+            .buttonStyle(.borderedProminent)
+
+            ScrollView {
+                VStack {
+                    ForEach(logLines) { line in
+                        Text(line.message)
+                            .foregroundStyle(line.level.style)
+                    }
+                    .fontDesign(.monospaced)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .textSelection(.enabled)
+            .focusable()
+            .defaultScrollAnchor(.bottom)
         }
         .padding()
-        .task {
-            for await line in pit.logLines {
-                logLines.append(line)
+        .task(id: pit.logId) {
+            logLines.append(.init("--------------------------------------"))
+            if let log = pit.logLines {
+                for await line in log {
+                    logLines.append(line)
+                }
             }
         }
         .task {
-            for await event in WindowProvider.events! {
+            guard let events = await WindowProvider.events?.subscribe() else { return }
+            for await event in events {
                 switch event {
-                case .setTitle(_, let title):
-                    self.title = title
-                case .draw(let window):
-                    let cgImage = window.buffer.withUnsafeMutableBytes { bufferPtr in
-                        let ctx = CGContext(
-                            data: bufferPtr.baseAddress,
-                            width: Int(window.width),
-                            height: Int(window.height),
-                            bitsPerComponent: 8,
-                            bytesPerRow: Int(window.width * window.pixelSize),
-                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
-                        )!
-                        return ctx.makeImage()!
-                    }
-                    mainWindow = Image(cgImage, scale: 1, label: Text("mainWindow"))
-                case .createWindow:
-                    mainWindowFocused = true
-                case .destroyWindow:
-                    mainWindowFocused = false
+                case .setTitle, .draw:
+                    break
+                case .createWindow(let window):
+                    let info = CreateWindowInfo(
+                        width: CGFloat(window.width),
+                        height: CGFloat(window.height),
+                        title: window.title
+                    )
+                    openWindow(id: "deviceWindow", value: info)
+                case .destroyWindow(let window):
+                    let info = CreateWindowInfo(
+                        width: CGFloat(window.width),
+                        height: CGFloat(window.height),
+                        title: window.title
+                    )
+                    dismissWindow(id: "deviceWindow", value: info)
                 }
             }
         }
@@ -124,4 +127,5 @@ private extension LogLine.Level {
 
 #Preview {
     ContentView()
+        .environment(Pit())
 }
