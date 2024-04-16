@@ -9,6 +9,7 @@ import OSLog
 extension Logger {
     static var `default`: Self { .init(subsystem: Bundle.main.bundleIdentifier!, category: "default") }
     static var pit: Self { .init(subsystem: Bundle.main.bundleIdentifier!, category: "pit") }
+    static var wp: Self { .init(subsystem: Bundle.main.bundleIdentifier!, category: "windowProvider") }
 }
 
 struct LogLine: Identifiable, Sendable {

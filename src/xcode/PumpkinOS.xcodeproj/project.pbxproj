@@ -31,6 +31,7 @@
 		44C5B75A2BCDE4680043DD3E /* main.lua in Resources */ = {isa = PBXBuildFile; fileRef = 44C5B7382BCDD8B90043DD3E /* main.lua */; };
 		44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B75B2BCDE4B90043DD3E /* Logging.swift */; };
 		44D8F6492BCE99E600E3127F /* PumpkinVFS in Copy VFS */ = {isa = PBXBuildFile; fileRef = 44D8F6482BCE991C00E3127F /* PumpkinVFS */; };
+		44D8F6562BCEB8B400E3127F /* WindowProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44D8F6552BCEB8B400E3127F /* WindowProvider.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -201,6 +202,7 @@
 		44D8F6312BCE31B000E3127F /* Launcher */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Launcher; path = ../Launcher; sourceTree = "<group>"; };
 		44D8F6482BCE991C00E3127F /* PumpkinVFS */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PumpkinVFS; sourceTree = "<group>"; };
 		44D8F64A2BCEA9FC00E3127F /* BOOT */ = {isa = PBXFileReference; lastKnownFileType = folder; name = BOOT; path = ../BOOT; sourceTree = "<group>"; };
+		44D8F6552BCEB8B400E3127F /* WindowProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -271,6 +273,7 @@
 				44C5B7432BCDDA850043DD3E /* ContentView.swift */,
 				44C5B75B2BCDE4B90043DD3E /* Logging.swift */,
 				442E5C9B2BCE114B00E4445D /* Pit.swift */,
+				44D8F6552BCEB8B400E3127F /* WindowProvider.swift */,
 				44C5B7452BCDDA870043DD3E /* Assets.xcassets */,
 			);
 			path = App;
@@ -567,6 +570,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */,
+				44D8F6562BCEB8B400E3127F /* WindowProvider.swift in Sources */,
 				442E5C9C2BCE114B00E4445D /* Pit.swift in Sources */,
 				44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */,
 				44C5B7422BCDDA850043DD3E /* App.swift in Sources */,

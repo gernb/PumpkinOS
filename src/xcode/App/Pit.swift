@@ -14,6 +14,28 @@ final class Pit: Sendable {
     @MainActor private(set) var running = false
 
     private var mainLoopTask: Task<Void, Never>?
+    private static var wp = window_provider_t(
+        create: { WindowProvider.create(encoding: $0, widthPtr: $1, heightPtr: $2, xfactor: $3, yfactor: $4, rotate: $5, fullscreen: $6, software: $7, dataPtr: $8) },
+        event: nil,
+        destroy: { WindowProvider.destroy(windowPtr: $0) },
+        erase: nil,
+        render: nil,
+        background: nil,
+        create_texture: { WindowProvider.createTexture(windowPtr: $0, width: $1, height: $2) },
+        destroy_texture: { WindowProvider.destroyTexture(windowPtr: $0, texturePtr: $1) },
+        update_texture: { WindowProvider.updateTexture(windowPtr: $0, texturePtr: $1, rawPtr: $2) },
+        draw_texture: nil,
+        status: nil,
+        title: { WindowProvider.title(windowPtr: $0, titlePtr: $1) },
+        clipboard: nil,
+        event2: { WindowProvider.event2(windowPtr: $0, wait: $1, arg1Ptr: $2, arg2Ptr: $3) },
+        update: nil,
+        draw_texture_rect: { WindowProvider.drawTexture(windowPtr: $0, texturePtr: $1, tx: $2, ty: $3, w: $4, h: $5, x: $6, y: $7) },
+        update_texture_rect: { WindowProvider.updateTexture(windowPtr: $0, texturePtr: $1, srcPtr: $2, tx: $3, ty: $4, w: $5, h: $6) },
+        move: nil,
+        average: nil,
+        data: nil
+    )
 
     enum Constants {
         static let libraryDir = URL.libraryDirectory.appending(path: Bundle.main.bundleIdentifier!)
@@ -103,6 +125,7 @@ final class Pit: Sendable {
         guard let data else { return }
         let instance: Pit = Unmanaged.fromOpaque(data).takeUnretainedValue()
         instance.mountVFS()
+        instance.registerWindowProvider(enginePtr: enginePtr)
     }
 
     private func mountVFS() {
@@ -113,6 +136,14 @@ final class Pit: Sendable {
         }
         free(virtual)
         free(local)
+    }
+
+    private func registerWindowProvider(enginePtr: Int32) {
+        let cStr = strdup(WINDOW_PROVIDER)
+        if script_set_pointer(enginePtr, cStr, &Self.wp) != 0 {
+            Logger.default.critical("Failed to register window provider")
+        }
+        free(cStr)
     }
 
     private func createVFSDirectory() {
