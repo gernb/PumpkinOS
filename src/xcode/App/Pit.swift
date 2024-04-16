@@ -32,6 +32,7 @@ final class Pit: Sendable {
                 eventMask: .extend,
                 queue: .global()
             )
+            let logger = Logger.pit
             source.setEventHandler {
                 guard
                     let string = String(data: fileHandle.availableData, encoding: .utf8)?.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -41,10 +42,10 @@ final class Pit: Sendable {
                     .map(LogLine.init)
                     .forEach { logLine in
                         switch logLine.level {
-                        case .trace: Logger.pit.debug("\(logLine.message, privacy: .public)")
-                        case .info: Logger.pit.info("\(logLine.message, privacy: .public)")
-                        case .error: Logger.pit.critical("\(logLine.message, privacy: .public)")
-                        case .unknown: Logger.pit.info("\(logLine.message, privacy: .public)")
+                        case .trace: logger.debug("\(logLine.message, privacy: .public)")
+                        case .info: logger.info("\(logLine.message, privacy: .public)")
+                        case .error: logger.critical("\(logLine.message, privacy: .public)")
+                        case .unknown: logger.info("\(logLine.message, privacy: .public)")
                         }
                         publisher.yield(logLine)
                     }
@@ -70,6 +71,7 @@ final class Pit: Sendable {
         }
         running = true
         mainLoopTask = Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self else { return }
             let args = ["app", "-d", "\(debugLevel)", "-f", Constants.logUrl.path, "-s", "libscriptlua.so", scriptPath]
             var cargs = args.map { strdup($0) }
             defer { cargs.forEach { free($0) } }
@@ -77,7 +79,7 @@ final class Pit: Sendable {
                 Int32(args.count),
                 &cargs,
                 { Pit.mainCallback(enginePtr: $0, data: $1) },
-                nil
+                Unmanaged.passUnretained(self).toOpaque()
             )
             if result != 0 {
                 Logger.default.critical("pit_main returned error status: \(result)")
@@ -98,10 +100,12 @@ final class Pit: Sendable {
     }
 
     private static func mainCallback(enginePtr: Int32, data: UnsafeMutableRawPointer?) {
-        mountVFS()
+        guard let data else { return }
+        let instance: Pit = Unmanaged.fromOpaque(data).takeUnretainedValue()
+        instance.mountVFS()
     }
 
-    private static func mountVFS() {
+    private func mountVFS() {
         let local = strdup(Constants.vfsUrl.path())
         let virtual = strdup("/")
         if vfs_local_mount(local, virtual) != 0 {
