@@ -11,6 +11,8 @@ struct ContentView: View {
     @State private var logLines: [LogLine] = []
     @State private var title = ""
     @State private var mainWindow = Image(systemName: "xmark")
+    @State private var isDragging = false
+    @FocusState private var mainWindowFocused
 
     var body: some View {
         HStack {
@@ -39,6 +41,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
+                .focusable()
                 .defaultScrollAnchor(.bottom)
             }
 
@@ -47,6 +50,28 @@ struct ContentView: View {
                     .frame(width: 320, alignment: .leading)
                 mainWindow
                     .frame(width: 320, height: 320)
+                    .focusable()
+                    .focusEffectDisabled()
+                    .focused($mainWindowFocused)
+                    .gesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { event in
+                                if isDragging {
+                                    WindowProvider.mouseMove(to: event.location)
+                                } else {
+                                    WindowProvider.mouseDown(at: event.location)
+                                    isDragging = true
+                                }
+                            }
+                            .onEnded { event in
+                                WindowProvider.mouseUp(at: event.location)
+                                isDragging = false
+                            }
+                    )
+                    .onKeyPress(phases: .all) { keyPress in
+                        WindowProvider.keyEvent(keyPress)
+                        return .handled
+                    }
                     .padding()
                     .border(.secondary)
             }
@@ -76,8 +101,10 @@ struct ContentView: View {
                         return ctx.makeImage()!
                     }
                     mainWindow = Image(cgImage, scale: 1, label: Text("mainWindow"))
-                case .createWindow, .destroyWindow:
-                    break
+                case .createWindow:
+                    mainWindowFocused = true
+                case .destroyWindow:
+                    mainWindowFocused = false
                 }
             }
         }

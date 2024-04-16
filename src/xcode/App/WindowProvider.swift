@@ -6,6 +6,7 @@
 
 import Foundation
 import OSLog
+import SwiftUI
 
 struct WindowProvider {
     enum Event {
@@ -15,11 +16,69 @@ struct WindowProvider {
         case draw(Window)
     }
 
+    enum Input {
+        case keyDown(Int32)
+        case keyUp(Int32)
+        case mouseDown
+        case mouseUp
+        case mouseMove(x: Int32, y: Int32)
+    }
+
     static var events: AsyncStream<Event>?
     private static var publisher: AsyncStream<Event>.Continuation?
+    private static var inputEvents: [Input] = []
 
     static func initialize() {
         (self.events, self.publisher) = AsyncStream<Event>.makeStream()
+    }
+
+    static func keyEvent(_ keyPress: KeyPress) {
+        let code: Int32 = switch keyPress.key {
+        case .delete: 8
+        case .tab: 9
+        case .return: 13
+        case .home: WINDOW_KEY_HOME
+        case .leftArrow: WINDOW_KEY_LEFT
+        case .upArrow: WINDOW_KEY_UP
+        case .rightArrow: WINDOW_KEY_RIGHT
+        case .downArrow: WINDOW_KEY_DOWN
+        default:
+            if let ascii = keyPress.key.character.asciiValue {
+                Int32(ascii)
+            } else {
+                switch keyPress.key.character {
+                case "\u{F704}": WINDOW_KEY_F1
+                case "\u{F705}": WINDOW_KEY_F2
+                case "\u{F706}": WINDOW_KEY_F3
+                case "\u{F707}": WINDOW_KEY_F4
+                case "\u{F708}": WINDOW_KEY_F5
+                default: 0
+                }
+            }
+        }
+        print(keyPress)
+        switch keyPress.phase {
+        case .down, .repeat:
+            inputEvents.append(.keyDown(code))
+        case .up:
+            inputEvents.append(.keyUp(code))
+        default:
+            break
+        }
+    }
+
+    static func mouseDown(at location: CGPoint) {
+        inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
+        inputEvents.append(.mouseDown)
+    }
+
+    static func mouseMove(to location: CGPoint) {
+        inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
+    }
+
+    static func mouseUp(at location: CGPoint) {
+        inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
+        inputEvents.append(.mouseUp)
     }
 
     static func create(
@@ -201,10 +260,32 @@ struct WindowProvider {
         arg1Ptr: UnsafeMutablePointer<Int32>?,
         arg2Ptr: UnsafeMutablePointer<Int32>?
     ) -> Int32 {
-        guard let windowPtr else { return -1 }
-        let window: Window = Unmanaged.fromOpaque(UnsafeRawPointer(windowPtr)).takeUnretainedValue()
-//        Logger.wp.debug("Window '\(window.id)' event2; wait=\(wait), arg1=\(arg1Ptr?.pointee ?? 999), arg2-\(arg2Ptr?.pointee ?? 999)")
-        return 0
+        guard inputEvents.isEmpty == false else { return 0 }
+        let event = inputEvents.removeFirst()
+        switch event {
+        case .keyDown(let code):
+            Logger.wp.debug("Window key down: \(code)")
+            arg1Ptr?.pointee = code
+            arg2Ptr?.pointee = 0
+            return WINDOW_KEYDOWN
+        case .keyUp(let code):
+            Logger.wp.debug("Window key up: \(code)")
+            arg1Ptr?.pointee = code
+            arg2Ptr?.pointee = 0
+            return WINDOW_KEYUP
+        case .mouseDown:
+            arg1Ptr?.pointee = 1
+            arg2Ptr?.pointee = 0
+            return WINDOW_BUTTONDOWN
+        case .mouseMove(let x, let y):
+            arg1Ptr?.pointee = x
+            arg2Ptr?.pointee = y
+            return WINDOW_MOTION
+        case .mouseUp:
+            arg1Ptr?.pointee = 1
+            arg2Ptr?.pointee = 0
+            return WINDOW_BUTTONUP
+        }
     }
 
     final class Window {
