@@ -1,0 +1,687 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		44C5B7332BCDD7710043DD3E /* Clean */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 44C5B7342BCDD7710043DD3E /* Build configuration list for PBXAggregateTarget "Clean" */;
+			buildPhases = (
+				44C5B7372BCDD7840043DD3E /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = Clean;
+			productName = Clean;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 442E5C912BCDEC7400E4445D /* libscriptlua.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		44C5B7422BCDDA850043DD3E /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7412BCDDA850043DD3E /* App.swift */; };
+		44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7432BCDDA850043DD3E /* ContentView.swift */; };
+		44C5B7462BCDDA870043DD3E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44C5B7452BCDDA870043DD3E /* Assets.xcassets */; };
+		44C5B7592BCDE2760043DD3E /* libpit.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 44C5B7582BCDE2760043DD3E /* libpit.so */; };
+		44C5B75A2BCDE4680043DD3E /* main.lua in Resources */ = {isa = PBXBuildFile; fileRef = 44C5B7382BCDD8B90043DD3E /* main.lua */; };
+		44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B75B2BCDE4B90043DD3E /* Logging.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		442E5C8F2BCDEC5600E4445D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B70D2BCDD30E0043DD3E;
+			remoteInfo = lua;
+		};
+		44C5B71D2BCDD4370043DD3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44C5B7242BCDD51D0043DD3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44C5B72D2BCDD5A30043DD3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44C5B72F2BCDD5A60043DD3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7202BCDD4CF0043DD3E;
+			remoteInfo = libpumpkin;
+		};
+		44C5B74E2BCDDA9D0043DD3E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		442E5C932BCDF1AF00E4445D /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		442E5C8D2BCDE7E600E4445D /* swiftlint.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = swiftlint.sh; sourceTree = "<group>"; };
+		442E5C912BCDEC7400E4445D /* libscriptlua.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libscriptlua.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		44C5B6F72BCDC55E0043DD3E /* pilrc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pilrc; path = ../pilrc; sourceTree = "<group>"; };
+		44C5B6F82BCDC6A90043DD3E /* Project-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Project-Debug.xcconfig"; sourceTree = "<group>"; };
+		44C5B6F92BCDC6A90043DD3E /* Makefile-Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Makefile-Shared.xcconfig"; sourceTree = "<group>"; };
+		44C5B6FA2BCDC6A90043DD3E /* Project-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Project-Release.xcconfig"; sourceTree = "<group>"; };
+		44C5B6FB2BCDC6A90043DD3E /* Project-Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Project-Shared.xcconfig"; sourceTree = "<group>"; };
+		44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Makefile-Debug.xcconfig"; sourceTree = "<group>"; };
+		44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Makefile-Release.xcconfig"; sourceTree = "<group>"; };
+		44C5B6FF2BCDC80E0043DD3E /* commonp.mak */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = commonp.mak; path = ../commonp.mak; sourceTree = "<group>"; };
+		44C5B7002BCDC8250043DD3E /* common.mak */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; name = common.mak; path = ../common.mak; sourceTree = "<group>"; };
+		44C5B7012BCDCEF50043DD3E /* prcbuild */ = {isa = PBXFileReference; lastKnownFileType = folder; name = prcbuild; path = ../prcbuild; sourceTree = "<group>"; };
+		44C5B7062BCDCFF30043DD3E /* libpit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = libpit; path = ../libpit; sourceTree = "<group>"; };
+		44C5B70C2BCDD2E90043DD3E /* lua */ = {isa = PBXFileReference; lastKnownFileType = folder; name = lua; path = ../lua; sourceTree = "<group>"; };
+		44C5B71F2BCDD4960043DD3E /* libpumpkin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = libpumpkin; path = ../libpumpkin; sourceTree = "<group>"; };
+		44C5B7282BCDD5810043DD3E /* libos */ = {isa = PBXFileReference; lastKnownFileType = folder; name = libos; path = ../libos; sourceTree = "<group>"; };
+		44C5B7382BCDD8B90043DD3E /* main.lua */ = {isa = PBXFileReference; lastKnownFileType = text; path = main.lua; sourceTree = "<group>"; };
+		44C5B7392BCDD9720043DD3E /* font */ = {isa = PBXFileReference; lastKnownFileType = folder; name = font; path = ../font; sourceTree = "<group>"; };
+		44C5B73E2BCDDA850043DD3E /* PumpkinOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PumpkinOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		44C5B7412BCDDA850043DD3E /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+		44C5B7432BCDDA850043DD3E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		44C5B7452BCDDA870043DD3E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		44C5B7502BCDDB700043DD3E /* App-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-Debug.xcconfig"; sourceTree = "<group>"; };
+		44C5B7512BCDDB700043DD3E /* App-Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-Release.xcconfig"; sourceTree = "<group>"; };
+		44C5B7522BCDDB700043DD3E /* App-Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "App-Shared.xcconfig"; sourceTree = "<group>"; };
+		44C5B7532BCDDEC40043DD3E /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
+		44C5B7582BCDE2760043DD3E /* libpit.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libpit.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		44C5B75B2BCDE4B90043DD3E /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		44C5B73B2BCDDA850043DD3E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44C5B7592BCDE2760043DD3E /* libpit.so in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		44C5B6EC2BCDC4570043DD3E = {
+			isa = PBXGroup;
+			children = (
+				44C5B7402BCDDA850043DD3E /* App */,
+				442E5C8D2BCDE7E600E4445D /* swiftlint.sh */,
+				44C5B7002BCDC8250043DD3E /* common.mak */,
+				44C5B6FF2BCDC80E0043DD3E /* commonp.mak */,
+				44C5B7282BCDD5810043DD3E /* libos */,
+				44C5B71F2BCDD4960043DD3E /* libpumpkin */,
+				44C5B70C2BCDD2E90043DD3E /* lua */,
+				44C5B7062BCDCFF30043DD3E /* libpit */,
+				44C5B7392BCDD9720043DD3E /* font */,
+				44C5B6F72BCDC55E0043DD3E /* pilrc */,
+				44C5B7012BCDCEF50043DD3E /* prcbuild */,
+				44C5B6FE2BCDC6B20043DD3E /* xcconfig */,
+				44C5B73F2BCDDA850043DD3E /* Products */,
+				44C5B7572BCDE2760043DD3E /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		44C5B6FE2BCDC6B20043DD3E /* xcconfig */ = {
+			isa = PBXGroup;
+			children = (
+				44C5B7502BCDDB700043DD3E /* App-Debug.xcconfig */,
+				44C5B7512BCDDB700043DD3E /* App-Release.xcconfig */,
+				44C5B7522BCDDB700043DD3E /* App-Shared.xcconfig */,
+				44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */,
+				44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */,
+				44C5B6F92BCDC6A90043DD3E /* Makefile-Shared.xcconfig */,
+				44C5B6F82BCDC6A90043DD3E /* Project-Debug.xcconfig */,
+				44C5B6FA2BCDC6A90043DD3E /* Project-Release.xcconfig */,
+				44C5B6FB2BCDC6A90043DD3E /* Project-Shared.xcconfig */,
+			);
+			path = xcconfig;
+			sourceTree = "<group>";
+		};
+		44C5B73F2BCDDA850043DD3E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				44C5B73E2BCDDA850043DD3E /* PumpkinOS.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		44C5B7402BCDDA850043DD3E /* App */ = {
+			isa = PBXGroup;
+			children = (
+				44C5B7532BCDDEC40043DD3E /* App-Bridging-Header.h */,
+				44C5B7382BCDD8B90043DD3E /* main.lua */,
+				44C5B7412BCDDA850043DD3E /* App.swift */,
+				44C5B7432BCDDA850043DD3E /* ContentView.swift */,
+				44C5B75B2BCDE4B90043DD3E /* Logging.swift */,
+				44C5B7452BCDDA870043DD3E /* Assets.xcassets */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		44C5B7572BCDE2760043DD3E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				442E5C912BCDEC7400E4445D /* libscriptlua.so */,
+				44C5B7582BCDE2760043DD3E /* libpit.so */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		44C5B6F32BCDC4DF0043DD3E /* pilrc */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B6F62BCDC4DF0043DD3E /* Build configuration list for PBXLegacyTarget "pilrc" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../pilrc;
+			dependencies = (
+			);
+			name = pilrc;
+			passBuildSettingsInEnvironment = 1;
+			productName = pilrc;
+		};
+		44C5B7022BCDCF190043DD3E /* prcbuild */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B7032BCDCF190043DD3E /* Build configuration list for PBXLegacyTarget "prcbuild" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../prcbuild;
+			dependencies = (
+			);
+			name = prcbuild;
+			passBuildSettingsInEnvironment = 1;
+			productName = prcbuild;
+		};
+		44C5B7072BCDD0520043DD3E /* libpit */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B7082BCDD0520043DD3E /* Build configuration list for PBXLegacyTarget "libpit" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../libpit;
+			dependencies = (
+			);
+			name = libpit;
+			passBuildSettingsInEnvironment = 1;
+			productName = libpit;
+		};
+		44C5B70D2BCDD30E0043DD3E /* lua */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B70E2BCDD30E0043DD3E /* Build configuration list for PBXLegacyTarget "lua" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../lua;
+			dependencies = (
+				44C5B71E2BCDD4370043DD3E /* PBXTargetDependency */,
+			);
+			name = lua;
+			passBuildSettingsInEnvironment = 1;
+			productName = lua;
+		};
+		44C5B7202BCDD4CF0043DD3E /* libpumpkin */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B7212BCDD4CF0043DD3E /* Build configuration list for PBXLegacyTarget "libpumpkin" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../libpumpkin;
+			dependencies = (
+				44C5B7252BCDD51D0043DD3E /* PBXTargetDependency */,
+			);
+			name = libpumpkin;
+			passBuildSettingsInEnvironment = 1;
+			productName = libpumpkin;
+		};
+		44C5B7292BCDD59C0043DD3E /* libos */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44C5B72A2BCDD59C0043DD3E /* Build configuration list for PBXLegacyTarget "libos" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../libos;
+			dependencies = (
+				44C5B7302BCDD5A60043DD3E /* PBXTargetDependency */,
+				44C5B72E2BCDD5A30043DD3E /* PBXTargetDependency */,
+			);
+			name = libos;
+			passBuildSettingsInEnvironment = 1;
+			productName = libos;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXNativeTarget section */
+		44C5B73D2BCDDA850043DD3E /* App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 44C5B74B2BCDDA870043DD3E /* Build configuration list for PBXNativeTarget "App" */;
+			buildPhases = (
+				442E5C8E2BCDE81700E4445D /* SwiftLint */,
+				44C5B73A2BCDDA850043DD3E /* Sources */,
+				44C5B73B2BCDDA850043DD3E /* Frameworks */,
+				44C5B73C2BCDDA850043DD3E /* Resources */,
+				442E5C932BCDF1AF00E4445D /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				442E5C902BCDEC5600E4445D /* PBXTargetDependency */,
+				44C5B74F2BCDDA9D0043DD3E /* PBXTargetDependency */,
+			);
+			name = App;
+			productName = App;
+			productReference = 44C5B73E2BCDDA850043DD3E /* PumpkinOS.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		44C5B6ED2BCDC4570043DD3E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1530;
+				LastUpgradeCheck = 1530;
+				TargetAttributes = {
+					44C5B6F32BCDC4DF0043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B7022BCDCF190043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B7072BCDD0520043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B70D2BCDD30E0043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B7202BCDD4CF0043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B7292BCDD59C0043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B7332BCDD7710043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+					};
+					44C5B73D2BCDDA850043DD3E = {
+						CreatedOnToolsVersion = 15.3;
+						LastSwiftMigration = 1530;
+					};
+				};
+			};
+			buildConfigurationList = 44C5B6F02BCDC4570043DD3E /* Build configuration list for PBXProject "PumpkinOS" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 44C5B6EC2BCDC4570043DD3E;
+			productRefGroup = 44C5B73F2BCDDA850043DD3E /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				44C5B73D2BCDDA850043DD3E /* App */,
+				44C5B7332BCDD7710043DD3E /* Clean */,
+				44C5B6F32BCDC4DF0043DD3E /* pilrc */,
+				44C5B7022BCDCF190043DD3E /* prcbuild */,
+				44C5B7072BCDD0520043DD3E /* libpit */,
+				44C5B70D2BCDD30E0043DD3E /* lua */,
+				44C5B7202BCDD4CF0043DD3E /* libpumpkin */,
+				44C5B7292BCDD59C0043DD3E /* libos */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		44C5B73C2BCDDA850043DD3E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44C5B7462BCDDA870043DD3E /* Assets.xcassets in Resources */,
+				44C5B75A2BCDE4680043DD3E /* main.lua in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		442E5C8E2BCDE81700E4445D /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./swiftlint.sh\n";
+		};
+		44C5B7372BCDD7840043DD3E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "find .. -name \"*.o\" -delete\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		44C5B73A2BCDDA850043DD3E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */,
+				44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */,
+				44C5B7422BCDDA850043DD3E /* App.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		442E5C902BCDEC5600E4445D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B70D2BCDD30E0043DD3E /* lua */;
+			targetProxy = 442E5C8F2BCDEC5600E4445D /* PBXContainerItemProxy */;
+		};
+		44C5B71E2BCDD4370043DD3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44C5B71D2BCDD4370043DD3E /* PBXContainerItemProxy */;
+		};
+		44C5B7252BCDD51D0043DD3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44C5B7242BCDD51D0043DD3E /* PBXContainerItemProxy */;
+		};
+		44C5B72E2BCDD5A30043DD3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44C5B72D2BCDD5A30043DD3E /* PBXContainerItemProxy */;
+		};
+		44C5B7302BCDD5A60043DD3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7202BCDD4CF0043DD3E /* libpumpkin */;
+			targetProxy = 44C5B72F2BCDD5A60043DD3E /* PBXContainerItemProxy */;
+		};
+		44C5B74F2BCDDA9D0043DD3E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44C5B74E2BCDDA9D0043DD3E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		44C5B6F12BCDC4570043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6F82BCDC6A90043DD3E /* Project-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B6F22BCDC4570043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FA2BCDC6A90043DD3E /* Project-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B6F42BCDC4DF0043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B6F52BCDC4DF0043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B7042BCDCF190043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B7052BCDCF190043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B7092BCDD0520043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B70A2BCDD0520043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B70F2BCDD30E0043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B7102BCDD30E0043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B7222BCDD4CF0043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B7232BCDD4CF0043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B72B2BCDD59C0043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B72C2BCDD59C0043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B7352BCDD7710043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B7362BCDD7710043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+		44C5B74C2BCDDA870043DD3E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B7502BCDDB700043DD3E /* App-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44C5B74D2BCDDA870043DD3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B7512BCDDB700043DD3E /* App-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		44C5B6F02BCDC4570043DD3E /* Build configuration list for PBXProject "PumpkinOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B6F12BCDC4570043DD3E /* Debug */,
+				44C5B6F22BCDC4570043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B6F62BCDC4DF0043DD3E /* Build configuration list for PBXLegacyTarget "pilrc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B6F42BCDC4DF0043DD3E /* Debug */,
+				44C5B6F52BCDC4DF0043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B7032BCDCF190043DD3E /* Build configuration list for PBXLegacyTarget "prcbuild" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B7042BCDCF190043DD3E /* Debug */,
+				44C5B7052BCDCF190043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B7082BCDD0520043DD3E /* Build configuration list for PBXLegacyTarget "libpit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B7092BCDD0520043DD3E /* Debug */,
+				44C5B70A2BCDD0520043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B70E2BCDD30E0043DD3E /* Build configuration list for PBXLegacyTarget "lua" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B70F2BCDD30E0043DD3E /* Debug */,
+				44C5B7102BCDD30E0043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B7212BCDD4CF0043DD3E /* Build configuration list for PBXLegacyTarget "libpumpkin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B7222BCDD4CF0043DD3E /* Debug */,
+				44C5B7232BCDD4CF0043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B72A2BCDD59C0043DD3E /* Build configuration list for PBXLegacyTarget "libos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B72B2BCDD59C0043DD3E /* Debug */,
+				44C5B72C2BCDD59C0043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B7342BCDD7710043DD3E /* Build configuration list for PBXAggregateTarget "Clean" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B7352BCDD7710043DD3E /* Debug */,
+				44C5B7362BCDD7710043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44C5B74B2BCDDA870043DD3E /* Build configuration list for PBXNativeTarget "App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44C5B74C2BCDDA870043DD3E /* Debug */,
+				44C5B74D2BCDDA870043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+}
