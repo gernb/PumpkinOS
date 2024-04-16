@@ -22,6 +22,8 @@
 
 /* Begin PBXBuildFile section */
 		442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 442E5C912BCDEC7400E4445D /* libscriptlua.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		442E5C992BCE06D900E4445D /* libos.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 442E5C972BCE06D900E4445D /* libos.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		442E5C9C2BCE114B00E4445D /* Pit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 442E5C9B2BCE114B00E4445D /* Pit.swift */; };
 		44C5B7422BCDDA850043DD3E /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7412BCDDA850043DD3E /* App.swift */; };
 		44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7432BCDDA850043DD3E /* ContentView.swift */; };
 		44C5B7462BCDDA870043DD3E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 44C5B7452BCDDA870043DD3E /* Assets.xcassets */; };
@@ -37,6 +39,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 44C5B70D2BCDD30E0043DD3E;
 			remoteInfo = lua;
+		};
+		442E5C952BCE068B00E4445D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7292BCDD59C0043DD3E;
+			remoteInfo = libos;
 		};
 		44C5B71D2BCDD4370043DD3E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -83,6 +92,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */,
+				442E5C992BCE06D900E4445D /* libos.so in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,6 +101,8 @@
 /* Begin PBXFileReference section */
 		442E5C8D2BCDE7E600E4445D /* swiftlint.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = swiftlint.sh; sourceTree = "<group>"; };
 		442E5C912BCDEC7400E4445D /* libscriptlua.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libscriptlua.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		442E5C972BCE06D900E4445D /* libos.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libos.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		442E5C9B2BCE114B00E4445D /* Pit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pit.swift; sourceTree = "<group>"; };
 		44C5B6F72BCDC55E0043DD3E /* pilrc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pilrc; path = ../pilrc; sourceTree = "<group>"; };
 		44C5B6F82BCDC6A90043DD3E /* Project-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Project-Debug.xcconfig"; sourceTree = "<group>"; };
 		44C5B6F92BCDC6A90043DD3E /* Makefile-Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Makefile-Shared.xcconfig"; sourceTree = "<group>"; };
@@ -183,6 +195,7 @@
 				44C5B7412BCDDA850043DD3E /* App.swift */,
 				44C5B7432BCDDA850043DD3E /* ContentView.swift */,
 				44C5B75B2BCDE4B90043DD3E /* Logging.swift */,
+				442E5C9B2BCE114B00E4445D /* Pit.swift */,
 				44C5B7452BCDDA870043DD3E /* Assets.xcassets */,
 			);
 			path = App;
@@ -191,6 +204,7 @@
 		44C5B7572BCDE2760043DD3E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				442E5C972BCE06D900E4445D /* libos.so */,
 				442E5C912BCDEC7400E4445D /* libscriptlua.so */,
 				44C5B7582BCDE2760043DD3E /* libpit.so */,
 			);
@@ -304,6 +318,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				442E5C962BCE068B00E4445D /* PBXTargetDependency */,
 				442E5C902BCDEC5600E4445D /* PBXTargetDependency */,
 				44C5B74F2BCDDA9D0043DD3E /* PBXTargetDependency */,
 			);
@@ -432,6 +447,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */,
+				442E5C9C2BCE114B00E4445D /* Pit.swift in Sources */,
 				44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */,
 				44C5B7422BCDDA850043DD3E /* App.swift in Sources */,
 			);
@@ -444,6 +460,11 @@
 			isa = PBXTargetDependency;
 			target = 44C5B70D2BCDD30E0043DD3E /* lua */;
 			targetProxy = 442E5C8F2BCDEC5600E4445D /* PBXContainerItemProxy */;
+		};
+		442E5C962BCE068B00E4445D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7292BCDD59C0043DD3E /* libos */;
+			targetProxy = 442E5C952BCE068B00E4445D /* PBXContainerItemProxy */;
 		};
 		44C5B71E2BCDD4370043DD3E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

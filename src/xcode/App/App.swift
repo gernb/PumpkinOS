@@ -8,9 +8,15 @@ import SwiftUI
 
 @main
 struct AppApp: App {
+    let pit = Pit()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(pit)
+                .onAppear {
+                    pit.main()
+                }
         }
     }
 }

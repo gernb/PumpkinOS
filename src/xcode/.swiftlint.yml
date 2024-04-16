@@ -1,0 +1,4 @@
+disabled_rules:
+- opening_brace
+- line_length
+

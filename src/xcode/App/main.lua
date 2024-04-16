@@ -5,19 +5,8 @@ function cleanup_callback()
 end
 
 pit.cleanup(cleanup_callback)
-pit.finish(0)
 
---wp = pit.loadlib("liblsdl2")
-
---if not wp then
---  print("window provider not found")
---  pit.finish(0)
---  return
---end
-
---pit.mount("./vfs/", "/")
-
---pumpkin = pit.loadlib("libos")
---pumpkin.init()
+pumpkin = pit.loadlib("libos")
+pumpkin.init()
 --pumpkin.start(320, 320, 16, false, false, false, "Launcher")
 --pumpkin.start(1024, 680, 16, false, false, false, "Launcher")
