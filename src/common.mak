@@ -142,7 +142,7 @@ CC=gcc
 ROOT=$(CONFIGURATION_BUILD_DIR)
 BIN=$(ROOT)
 SRC=../
-VFS=$(ROOT)/vfs
+VFS=$(SRC)/xcode/PumpkinVFS
 TOOLS=$(ROOT)
 LIBPIT=$(SRC)/libpit
 else

@@ -21,8 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 442E5C912BCDEC7400E4445D /* libscriptlua.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		442E5C992BCE06D900E4445D /* libos.so in CopyFiles */ = {isa = PBXBuildFile; fileRef = 442E5C972BCE06D900E4445D /* libos.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		442E5C942BCDF1CA00E4445D /* libscriptlua.so in Copy Dylibs */ = {isa = PBXBuildFile; fileRef = 442E5C912BCDEC7400E4445D /* libscriptlua.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		442E5C992BCE06D900E4445D /* libos.so in Copy Dylibs */ = {isa = PBXBuildFile; fileRef = 442E5C972BCE06D900E4445D /* libos.so */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		442E5C9C2BCE114B00E4445D /* Pit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 442E5C9B2BCE114B00E4445D /* Pit.swift */; };
 		44C5B7422BCDDA850043DD3E /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7412BCDDA850043DD3E /* App.swift */; };
 		44C5B7442BCDDA850043DD3E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B7432BCDDA850043DD3E /* ContentView.swift */; };
@@ -30,6 +30,7 @@
 		44C5B7592BCDE2760043DD3E /* libpit.so in Frameworks */ = {isa = PBXBuildFile; fileRef = 44C5B7582BCDE2760043DD3E /* libpit.so */; };
 		44C5B75A2BCDE4680043DD3E /* main.lua in Resources */ = {isa = PBXBuildFile; fileRef = 44C5B7382BCDD8B90043DD3E /* main.lua */; };
 		44C5B75C2BCDE4B90043DD3E /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C5B75B2BCDE4B90043DD3E /* Logging.swift */; };
+		44D8F6492BCE99E600E3127F /* PumpkinVFS in Copy VFS */ = {isa = PBXBuildFile; fileRef = 44D8F6482BCE991C00E3127F /* PumpkinVFS */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,18 +83,65 @@
 			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
 			remoteInfo = libpit;
 		};
+		44D8F6362BCE327E00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44D8F6322BCE322B00E3127F;
+			remoteInfo = Launcher;
+		};
+		44D8F6382BCE32E800E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B6F32BCDC4DF0043DD3E;
+			remoteInfo = pilrc;
+		};
+		44D8F63A2BCE32EC00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7022BCDCF190043DD3E;
+			remoteInfo = prcbuild;
+		};
+		44D8F63C2BCE334100E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7202BCDD4CF0043DD3E;
+			remoteInfo = libpumpkin;
+		};
+		44D8F63E2BCE334600E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		442E5C932BCDF1AF00E4445D /* CopyFiles */ = {
+		442E5C932BCDF1AF00E4445D /* Copy Dylibs */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				442E5C942BCDF1CA00E4445D /* libscriptlua.so in CopyFiles */,
-				442E5C992BCE06D900E4445D /* libos.so in CopyFiles */,
+				442E5C942BCDF1CA00E4445D /* libscriptlua.so in Copy Dylibs */,
+				442E5C992BCE06D900E4445D /* libos.so in Copy Dylibs */,
 			);
+			name = "Copy Dylibs";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		44D8F6462BCE3A0300E3127F /* Copy VFS */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "";
+			dstSubfolderSpec = 7;
+			files = (
+				44D8F6492BCE99E600E3127F /* PumpkinVFS in Copy VFS */,
+			);
+			name = "Copy VFS";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -129,6 +177,8 @@
 		44C5B7532BCDDEC40043DD3E /* App-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "App-Bridging-Header.h"; sourceTree = "<group>"; };
 		44C5B7582BCDE2760043DD3E /* libpit.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libpit.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		44C5B75B2BCDE4B90043DD3E /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+		44D8F6312BCE31B000E3127F /* Launcher */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Launcher; path = ../Launcher; sourceTree = "<group>"; };
+		44D8F6482BCE991C00E3127F /* PumpkinVFS */ = {isa = PBXFileReference; lastKnownFileType = folder; path = PumpkinVFS; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,9 +197,11 @@
 			isa = PBXGroup;
 			children = (
 				44C5B7402BCDDA850043DD3E /* App */,
+				44D8F6482BCE991C00E3127F /* PumpkinVFS */,
 				442E5C8D2BCDE7E600E4445D /* swiftlint.sh */,
 				44C5B7002BCDC8250043DD3E /* common.mak */,
 				44C5B6FF2BCDC80E0043DD3E /* commonp.mak */,
+				44D8F6312BCE31B000E3127F /* Launcher */,
 				44C5B7282BCDD5810043DD3E /* libos */,
 				44C5B71F2BCDD4960043DD3E /* libpumpkin */,
 				44C5B70C2BCDD2E90043DD3E /* lua */,
@@ -302,6 +354,24 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = libos;
 		};
+		44D8F6322BCE322B00E3127F /* Launcher */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44D8F6332BCE322B00E3127F /* Build configuration list for PBXLegacyTarget "Launcher" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../Launcher;
+			dependencies = (
+				44D8F63F2BCE334600E3127F /* PBXTargetDependency */,
+				44D8F63D2BCE334100E3127F /* PBXTargetDependency */,
+				44D8F63B2BCE32EC00E3127F /* PBXTargetDependency */,
+				44D8F6392BCE32E800E3127F /* PBXTargetDependency */,
+			);
+			name = Launcher;
+			passBuildSettingsInEnvironment = 1;
+			productName = Launcher;
+		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
@@ -313,11 +383,13 @@
 				44C5B73A2BCDDA850043DD3E /* Sources */,
 				44C5B73B2BCDDA850043DD3E /* Frameworks */,
 				44C5B73C2BCDDA850043DD3E /* Resources */,
-				442E5C932BCDF1AF00E4445D /* CopyFiles */,
+				442E5C932BCDF1AF00E4445D /* Copy Dylibs */,
+				44D8F6462BCE3A0300E3127F /* Copy VFS */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				44D8F6372BCE327E00E3127F /* PBXTargetDependency */,
 				442E5C962BCE068B00E4445D /* PBXTargetDependency */,
 				442E5C902BCDEC5600E4445D /* PBXTargetDependency */,
 				44C5B74F2BCDDA9D0043DD3E /* PBXTargetDependency */,
@@ -362,6 +434,9 @@
 						CreatedOnToolsVersion = 15.3;
 						LastSwiftMigration = 1530;
 					};
+					44D8F6322BCE322B00E3127F = {
+						CreatedOnToolsVersion = 15.3;
+					};
 				};
 			};
 			buildConfigurationList = 44C5B6F02BCDC4570043DD3E /* Build configuration list for PBXProject "PumpkinOS" */;
@@ -385,6 +460,7 @@
 				44C5B70D2BCDD30E0043DD3E /* lua */,
 				44C5B7202BCDD4CF0043DD3E /* libpumpkin */,
 				44C5B7292BCDD59C0043DD3E /* libos */,
+				44D8F6322BCE322B00E3127F /* Launcher */,
 			);
 		};
 /* End PBXProject section */
@@ -490,6 +566,31 @@
 			isa = PBXTargetDependency;
 			target = 44C5B7072BCDD0520043DD3E /* libpit */;
 			targetProxy = 44C5B74E2BCDDA9D0043DD3E /* PBXContainerItemProxy */;
+		};
+		44D8F6372BCE327E00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44D8F6322BCE322B00E3127F /* Launcher */;
+			targetProxy = 44D8F6362BCE327E00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6392BCE32E800E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B6F32BCDC4DF0043DD3E /* pilrc */;
+			targetProxy = 44D8F6382BCE32E800E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F63B2BCE32EC00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7022BCDCF190043DD3E /* prcbuild */;
+			targetProxy = 44D8F63A2BCE32EC00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F63D2BCE334100E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7202BCDD4CF0043DD3E /* libpumpkin */;
+			targetProxy = 44D8F63C2BCE334100E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F63F2BCE334600E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44D8F63E2BCE334600E3127F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -618,6 +719,20 @@
 			};
 			name = Release;
 		};
+		44D8F6342BCE322B00E3127F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44D8F6352BCE322B00E3127F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -698,6 +813,15 @@
 			buildConfigurations = (
 				44C5B74C2BCDDA870043DD3E /* Debug */,
 				44C5B74D2BCDDA870043DD3E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44D8F6332BCE322B00E3127F /* Build configuration list for PBXLegacyTarget "Launcher" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44D8F6342BCE322B00E3127F /* Debug */,
+				44D8F6352BCE322B00E3127F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
