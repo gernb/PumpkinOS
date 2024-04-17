@@ -46,26 +46,22 @@ struct WindowProvider {
     @MainActor
     static func keyEvent(_ keyPress: KeyPress) {
         let code: Int32 = switch keyPress.key {
-        case .delete: 8
         case .tab: 9
-        case .return: 13
         case .home: WINDOW_KEY_HOME
         case .leftArrow: WINDOW_KEY_LEFT
         case .upArrow: WINDOW_KEY_UP
         case .rightArrow: WINDOW_KEY_RIGHT
         case .downArrow: WINDOW_KEY_DOWN
         default:
-            if let ascii = keyPress.key.character.asciiValue {
-                Int32(ascii)
-            } else {
-                switch keyPress.key.character {
-                case "\u{F704}": WINDOW_KEY_F1
-                case "\u{F705}": WINDOW_KEY_F2
-                case "\u{F706}": WINDOW_KEY_F3
-                case "\u{F707}": WINDOW_KEY_F4
-                case "\u{F708}": WINDOW_KEY_F5
-                default: 0
-                }
+            switch keyPress.key.character {
+            case "\u{7F}": 8    // Delete key
+            case "\r": 13       // Return key
+            case "\u{F704}": WINDOW_KEY_F1
+            case "\u{F705}": WINDOW_KEY_F2
+            case "\u{F706}": WINDOW_KEY_F3
+            case "\u{F707}": WINDOW_KEY_F4
+            case "\u{F708}": WINDOW_KEY_F5
+            default: Int32(keyPress.key.character.asciiValue ?? 0)
             }
         }
         switch keyPress.phase {
