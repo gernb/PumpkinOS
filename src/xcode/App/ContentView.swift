@@ -20,8 +20,8 @@ struct ContentView: View {
     }
 
     @AppStorage("logLevel") private var logLevel = LogLevel.info
-    @AppStorage("width") private var width: Int = 320
-    @AppStorage("height") private var height: Int = 320
+    @AppStorage("width") private var width: Int = 650
+    @AppStorage("height") private var height: Int = 492
     @State private var showResetAlert = false
     @State private var logLines: [LogLine] = []
 

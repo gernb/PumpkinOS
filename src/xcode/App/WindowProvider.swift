@@ -283,7 +283,7 @@ struct WindowProvider {
                 for _ in 0 ..< h {
                     dest.copyMemory(from: src)
                     let destAddr = dest.baseAddress!.advanced(by: windowPitch)
-                    dest = UnsafeMutableRawBufferPointer(start: destAddr, count: dest.count - windowPitch)
+                    dest = UnsafeMutableRawBufferPointer(start: destAddr, count: max(dest.count - windowPitch, 0))
                     let srcAddr = src.baseAddress!.advanced(by: texturePitch)
                     src = UnsafeRawBufferPointer(start: srcAddr, count: len)
                 }

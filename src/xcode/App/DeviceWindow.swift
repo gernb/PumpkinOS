@@ -17,7 +17,6 @@ struct DeviceWindow: View {
     var body: some View {
         VStack(spacing: 0) {
             mainWindow
-                .frame(width: CGFloat(window.width), height: CGFloat(window.width))
                 .focusable()
                 .focusEffectDisabled()
                 .gesture(
