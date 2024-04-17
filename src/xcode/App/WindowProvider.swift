@@ -16,13 +16,18 @@ struct WindowProvider {
         case draw(Window)
     }
 
-    enum Input {
+    enum Input: Sendable {
         case keyDown(Int32)
         case keyUp(Int32)
         case mouseDown
         case mouseUp
         case mouseMove(x: Int32, y: Int32)
         case stop
+    }
+
+    enum Key: Sendable {
+        case home
+        case menu
     }
 
     @MainActor
@@ -41,6 +46,16 @@ struct WindowProvider {
     @MainActor
     static func reset() {
         inputEvents.removeAll()
+    }
+
+    @MainActor
+    static func keyEvent(_ key: Key) {
+        let code = switch key {
+        case .home: WINDOW_KEY_HOME
+        case .menu: WINDOW_KEY_F5
+        }
+        inputEvents.append(.keyDown(code))
+        inputEvents.append(.keyUp(code))
     }
 
     @MainActor
@@ -316,7 +331,7 @@ struct WindowProvider {
         }
     }
 
-    final class Window: Sendable {
+    final class Window: Codable, Hashable, Sendable {
         let id = UUID()
         let encoding: Int32
         let width: Int32
@@ -335,6 +350,16 @@ struct WindowProvider {
             self.size = Int(width * height) * 4
             self.buffer = Array(repeating: 0, count: size)
         }
+
+        static func == (lhs: Window, rhs: Window) -> Bool {
+            lhs.id == rhs.id
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(id)
+        }
+
+        static let empty = Window(encoding: ENC_RGBA, width: 320, height: 320)
     }
 
     final class Texture: Sendable {

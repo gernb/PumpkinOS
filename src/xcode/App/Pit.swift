@@ -104,6 +104,19 @@ final class Pit: Sendable {
         running = false
     }
 
+    @MainActor
+    func reset() {
+        guard running == false else { return }
+        if FileManager.default.fileExists(atPath: Constants.libraryDir.path) {
+            do {
+                try FileManager.default.removeItem(at: Constants.libraryDir)
+            } catch {
+                Logger.default.critical("Unable to delete library folder: \(String(describing: error), privacy: .public)")
+            }
+        }
+        createVFSDirectory()
+    }
+
     private static func mainCallback(enginePtr: Int32, data: UnsafeMutableRawPointer?) {
         guard let data else { return }
         let instance: Pit = Unmanaged.fromOpaque(data).takeUnretainedValue()

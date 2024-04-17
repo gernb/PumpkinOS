@@ -22,6 +22,7 @@ struct ContentView: View {
     @AppStorage("logLevel") private var logLevel = LogLevel.info
     @AppStorage("width") private var width: Int = 320
     @AppStorage("height") private var height: Int = 320
+    @State private var showResetAlert = false
     @State private var logLines: [LogLine] = []
 
     @Environment(Pit.self) private var pit
@@ -50,6 +51,20 @@ struct ContentView: View {
                 .disabled(pit.running)
 
                 Spacer()
+
+                Button("Reset") {
+                    showResetAlert.toggle()
+                }
+                .buttonStyle(.bordered)
+                .disabled(pit.running)
+                .alert("Please Confirm", isPresented: $showResetAlert) {
+                    Button("Yes", role: .destructive) {
+                        pit.reset()
+                        logLines = []
+                    }
+                } message: {
+                    Text("Are you sure you want to reset to a new state?")
+                }
 
                 if pit.running {
                     Button("Stop") {
@@ -80,6 +95,7 @@ struct ContentView: View {
             .defaultScrollAnchor(.bottom)
         }
         .padding()
+        .navigationTitle("Pumpkin App Console")
         .task(id: pit.logId) {
             logLines.append(.init("--------------------------------------"))
             if let log = pit.logLines {
@@ -95,19 +111,9 @@ struct ContentView: View {
                 case .setTitle, .draw:
                     break
                 case .createWindow(let window):
-                    let info = CreateWindowInfo(
-                        width: CGFloat(window.width),
-                        height: CGFloat(window.height),
-                        title: window.title
-                    )
-                    openWindow(id: "deviceWindow", value: info)
+                    openWindow(id: "deviceWindow", value: window)
                 case .destroyWindow(let window):
-                    let info = CreateWindowInfo(
-                        width: CGFloat(window.width),
-                        height: CGFloat(window.height),
-                        title: window.title
-                    )
-                    dismissWindow(id: "deviceWindow", value: info)
+                    dismissWindow(id: "deviceWindow", value: window)
                 }
             }
         }

@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct DeviceWindow: View {
-    let info: CreateWindowInfo
+    let window: WindowProvider.Window
 
     @Environment(Pit.self) private var pit
     @State private var title = "Untitled"
@@ -15,9 +15,9 @@ struct DeviceWindow: View {
     @State private var isDragging = false
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0) {
             mainWindow
-                .frame(width: info.width, height: info.width)
+                .frame(width: CGFloat(window.width), height: CGFloat(window.width))
                 .focusable()
                 .focusEffectDisabled()
                 .gesture(
@@ -39,9 +39,25 @@ struct DeviceWindow: View {
                     WindowProvider.keyEvent(keyPress)
                     return .handled
                 }
+            Divider()
+            HStack(spacing: 30) {
+                Button("Home", systemImage: "house.circle") {
+                    WindowProvider.keyEvent(.home)
+                }
+                Button("Menu", systemImage: "filemenu.and.selection") {
+                    WindowProvider.keyEvent(.menu)
+                }
+            }
+            .padding(5)
+            .labelStyle(.iconOnly)
+            .buttonStyle(.borderless)
+            .font(.largeTitle)
         }
         .navigationTitle(title)
-        .onAppear { title = info.title ?? title }
+        .onAppear {
+            title = window.title ?? title
+            mainWindow = window.image
+        }
         .onDisappear {
             Task {
                 await pit.stop()
@@ -54,19 +70,7 @@ struct DeviceWindow: View {
                 case .setTitle(_, let title):
                     self.title = title
                 case .draw(let window):
-                    let cgImage = window.buffer.withUnsafeMutableBytes { bufferPtr in
-                        let ctx = CGContext(
-                            data: bufferPtr.baseAddress,
-                            width: Int(window.width),
-                            height: Int(window.height),
-                            bitsPerComponent: 8,
-                            bytesPerRow: Int(window.width * window.pixelSize),
-                            space: CGColorSpace(name: CGColorSpace.sRGB)!,
-                            bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
-                        )!
-                        return ctx.makeImage()!
-                    }
-                    mainWindow = Image(cgImage, scale: 1, label: Text("mainWindow"))
+                    mainWindow = window.image
                 case .createWindow, .destroyWindow:
                     break
                 }
@@ -75,7 +79,25 @@ struct DeviceWindow: View {
     }
 }
 
+extension WindowProvider.Window {
+    var image: Image {
+        let cgImage = buffer.withUnsafeMutableBytes { bufferPtr in
+            let ctx = CGContext(
+                data: bufferPtr.baseAddress,
+                width: Int(width),
+                height: Int(height),
+                bitsPerComponent: 8,
+                bytesPerRow: Int(width * pixelSize),
+                space: CGColorSpace(name: CGColorSpace.sRGB)!,
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+            )!
+            return ctx.makeImage()!
+        }
+        return Image(cgImage, scale: 1, label: Text("Device Window"))
+    }
+}
+
 #Preview {
-    DeviceWindow(info: .init(width: 300, height: 300, title: "Preview"))
+    DeviceWindow(window: .empty)
         .environment(Pit())
 }
