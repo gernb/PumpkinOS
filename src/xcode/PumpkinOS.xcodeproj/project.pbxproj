@@ -425,6 +425,41 @@
 			remoteGlobalIDString = 44D8F6AD2BD0263000E3127F;
 			remoteInfo = ToDoList;
 		};
+		44D8F6E22BD02A5C00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7072BCDD0520043DD3E;
+			remoteInfo = libpit;
+		};
+		44D8F6E42BD02A5C00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7202BCDD4CF0043DD3E;
+			remoteInfo = libpumpkin;
+		};
+		44D8F6E62BD02A5C00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B6F32BCDC4DF0043DD3E;
+			remoteInfo = pilrc;
+		};
+		44D8F6E82BD02A5C00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44C5B7022BCDCF190043DD3E;
+			remoteInfo = prcbuild;
+		};
+		44D8F6EA2BD02A8B00E3127F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 44C5B6ED2BCDC4570043DD3E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 44D8F6DE2BD02A5300E3127F;
+			remoteInfo = MineHunt;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -499,6 +534,7 @@
 		44D8F6A22BD025CD00E3127F /* AddressBook */ = {isa = PBXFileReference; lastKnownFileType = folder; name = AddressBook; path = ../AddressBook; sourceTree = "<group>"; };
 		44D8F6A32BD025DA00E3127F /* ToDoList */ = {isa = PBXFileReference; lastKnownFileType = folder; name = ToDoList; path = ../ToDoList; sourceTree = "<group>"; };
 		44D8F6A42BD025EC00E3127F /* DateBook */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DateBook; path = ../DateBook; sourceTree = "<group>"; };
+		44D8F6DD2BD02A3E00E3127F /* MineHunt */ = {isa = PBXFileReference; lastKnownFileType = folder; name = MineHunt; path = ../MineHunt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -521,6 +557,7 @@
 				442E5C8D2BCDE7E600E4445D /* swiftlint.sh */,
 				44C5B7002BCDC8250043DD3E /* common.mak */,
 				44C5B6FF2BCDC80E0043DD3E /* commonp.mak */,
+				44D8F6DD2BD02A3E00E3127F /* MineHunt */,
 				44D8F6A42BD025EC00E3127F /* DateBook */,
 				44D8F6A32BD025DA00E3127F /* ToDoList */,
 				44D8F6A22BD025CD00E3127F /* AddressBook */,
@@ -865,6 +902,24 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = DateBook;
 		};
+		44D8F6DE2BD02A5300E3127F /* MineHunt */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "BITS=64 OSNAME=Xcode";
+			buildConfigurationList = 44D8F6DF2BD02A5300E3127F /* Build configuration list for PBXLegacyTarget "MineHunt" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = ../MineHunt;
+			dependencies = (
+				44D8F6E32BD02A5C00E3127F /* PBXTargetDependency */,
+				44D8F6E52BD02A5C00E3127F /* PBXTargetDependency */,
+				44D8F6E72BD02A5C00E3127F /* PBXTargetDependency */,
+				44D8F6E92BD02A5C00E3127F /* PBXTargetDependency */,
+			);
+			name = MineHunt;
+			passBuildSettingsInEnvironment = 1;
+			productName = MineHunt;
+		};
 /* End PBXLegacyTarget section */
 
 /* Begin PBXNativeTarget section */
@@ -882,6 +937,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				44D8F6EB2BD02A8B00E3127F /* PBXTargetDependency */,
 				44D8F6D62BD026D900E3127F /* PBXTargetDependency */,
 				44D8F6D82BD026D900E3127F /* PBXTargetDependency */,
 				44D8F6DA2BD026D900E3127F /* PBXTargetDependency */,
@@ -966,6 +1022,9 @@
 					44D8F6B12BD0263B00E3127F = {
 						CreatedOnToolsVersion = 15.3;
 					};
+					44D8F6DE2BD02A5300E3127F = {
+						CreatedOnToolsVersion = 15.3;
+					};
 				};
 			};
 			buildConfigurationList = 44C5B6F02BCDC4570043DD3E /* Build configuration list for PBXProject "PumpkinOS" */;
@@ -999,6 +1058,7 @@
 				44D8F6A92BD0262300E3127F /* AddressBook */,
 				44D8F6AD2BD0263000E3127F /* ToDoList */,
 				44D8F6B12BD0263B00E3127F /* DateBook */,
+				44D8F6DE2BD02A5300E3127F /* MineHunt */,
 			);
 		};
 /* End PBXProject section */
@@ -1351,6 +1411,31 @@
 			target = 44D8F6AD2BD0263000E3127F /* ToDoList */;
 			targetProxy = 44D8F6DB2BD026D900E3127F /* PBXContainerItemProxy */;
 		};
+		44D8F6E32BD02A5C00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7072BCDD0520043DD3E /* libpit */;
+			targetProxy = 44D8F6E22BD02A5C00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6E52BD02A5C00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7202BCDD4CF0043DD3E /* libpumpkin */;
+			targetProxy = 44D8F6E42BD02A5C00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6E72BD02A5C00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B6F32BCDC4DF0043DD3E /* pilrc */;
+			targetProxy = 44D8F6E62BD02A5C00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6E92BD02A5C00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44C5B7022BCDCF190043DD3E /* prcbuild */;
+			targetProxy = 44D8F6E82BD02A5C00E3127F /* PBXContainerItemProxy */;
+		};
+		44D8F6EB2BD02A8B00E3127F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 44D8F6DE2BD02A5300E3127F /* MineHunt */;
+			targetProxy = 44D8F6EA2BD02A8B00E3127F /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -1618,6 +1703,20 @@
 			};
 			name = Release;
 		};
+		44D8F6E02BD02A5300E3127F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FC2BCDC6A90043DD3E /* Makefile-Debug.xcconfig */;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		44D8F6E12BD02A5300E3127F /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44C5B6FD2BCDC6A90043DD3E /* Makefile-Release.xcconfig */;
+			buildSettings = {
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1788,6 +1887,15 @@
 			buildConfigurations = (
 				44D8F6B32BD0263B00E3127F /* Debug */,
 				44D8F6B42BD0263B00E3127F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		44D8F6DF2BD02A5300E3127F /* Build configuration list for PBXLegacyTarget "MineHunt" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				44D8F6E02BD02A5300E3127F /* Debug */,
+				44D8F6E12BD02A5300E3127F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -8,6 +8,7 @@ import SwiftUI
 
 @main
 struct AppApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     let pit = Pit()
 
     init() {
@@ -25,6 +26,12 @@ struct AppApp: App {
                 .environment(pit)
         }
         .windowResizability(.contentSize)
+    }
+}
+
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        return true
     }
 }
 
