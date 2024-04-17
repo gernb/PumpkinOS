@@ -20,8 +20,8 @@ struct ContentView: View {
     }
 
     @AppStorage("logLevel") private var logLevel = LogLevel.info
-    @AppStorage("width") private var width: Int = 1024
-    @AppStorage("height") private var height: Int = 600
+    @AppStorage("width") private var width: Int = 320
+    @AppStorage("height") private var height: Int = 320
     @State private var logLines: [LogLine] = []
 
     @Environment(Pit.self) private var pit

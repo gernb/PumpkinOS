@@ -9,7 +9,7 @@ import OSLog
 import SwiftUI
 
 struct WindowProvider {
-    enum Event {
+    enum Event: Sendable {
         case createWindow(Window)
         case destroyWindow(Window)
         case setTitle(Window, String)
@@ -25,20 +25,25 @@ struct WindowProvider {
         case stop
     }
 
-    static var events: AsyncSharedStream<Event>?
+    @MainActor
+    static private(set) var events: AsyncSharedStream<Event>?
+    @MainActor
     private static var publisher: AsyncStream<Event>.Continuation?
     private static var inputEvents: [Input] = []
 
+    @MainActor
     static func initialize() {
         let (events, publisher) = AsyncStream<Event>.makeStream()
         self.events = .init(events)
         self.publisher = publisher
     }
 
+    @MainActor
     static func reset() {
         inputEvents.removeAll()
     }
 
+    @MainActor
     static func keyEvent(_ keyPress: KeyPress) {
         let code: Int32 = switch keyPress.key {
         case .delete: 8
@@ -73,20 +78,24 @@ struct WindowProvider {
         }
     }
 
+    @MainActor
     static func mouseDown(at location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
         inputEvents.append(.mouseDown)
     }
 
+    @MainActor
     static func mouseMove(to location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
     }
 
+    @MainActor
     static func mouseUp(at location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
         inputEvents.append(.mouseUp)
     }
 
+    @MainActor
     static func stop() {
         inputEvents.append(.stop)
     }
@@ -110,7 +119,9 @@ struct WindowProvider {
             height: height
         )
         Logger.wp.debug("Create window: \(window.id); encoding=\(encoding), width=\(width), height=\(height)")
-        publisher?.yield(.createWindow(window))
+        Task { @MainActor in
+            _ = publisher?.yield(.createWindow(window))
+        }
         return Unmanaged.passRetained(window).toOpaque().assumingMemoryBound(to: window_t?.self)
     }
 
@@ -120,7 +131,9 @@ struct WindowProvider {
         guard let windowPtr else { return -1 }
         let window: Window = Unmanaged.fromOpaque(UnsafeRawPointer(windowPtr)).takeRetainedValue()
         Logger.wp.debug("Destroy window: \(window.id)")
-        publisher?.yield(.destroyWindow(window))
+        Task { @MainActor in
+            _ = publisher?.yield(.destroyWindow(window))
+        }
         return 0
     }
 
@@ -133,7 +146,9 @@ struct WindowProvider {
         let title = String(cString: titlePtr)
         Logger.wp.debug("Title window: \(window.id); '\(title)'")
         window.title = title
-        publisher?.yield(.setTitle(window, title))
+        Task { @MainActor in
+            _ = publisher?.yield(.setTitle(window, title))
+        }
     }
 
     static func createTexture(
@@ -263,7 +278,9 @@ struct WindowProvider {
                 }
             }
         }
-        publisher?.yield(.draw(window))
+        Task { @MainActor in
+            _ = publisher?.yield(.draw(window))
+        }
         return 0
     }
 
@@ -303,7 +320,7 @@ struct WindowProvider {
         }
     }
 
-    final class Window {
+    final class Window: Sendable {
         let id = UUID()
         let encoding: Int32
         let width: Int32
@@ -322,13 +339,9 @@ struct WindowProvider {
             self.size = Int(width * height) * 4
             self.buffer = Array(repeating: 0, count: size)
         }
-
-//        deinit {
-//            print("!!!")
-//        }
     }
 
-    final class Texture {
+    final class Texture: Sendable {
         let id = UUID()
         let width: Int32
         let height: Int32
@@ -341,9 +354,5 @@ struct WindowProvider {
             self.size = Int(width * height * pixelSize)
             self.buffer = Array(repeating: 0, count: size)
         }
-
-//        deinit {
-//            print("!!!")
-//        }
     }
 }

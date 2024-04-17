@@ -181,3 +181,5 @@ final class Pit: Sendable {
         }
     }
 }
+
+extension window_provider_t: @unchecked Sendable {}
