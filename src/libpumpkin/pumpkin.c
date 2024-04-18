@@ -526,9 +526,11 @@ static void pumpkin_unload_fonts(void) {
 
 int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_provider_t *ap, bt_provider_t *bt, gps_parse_line_f gps_parse_line) {
   int fd;
+#ifdef DARWIN
   vfs_session_t *vfs_session;
   char *vfs_root;
   char buf[256];
+#endif
 
   xmemset(&pumpkin_module, 0, sizeof(pumpkin_module_t));
 
@@ -583,6 +585,7 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
 
   SysUInitModule(); // sto calls SysQSortP
 
+#ifdef DARWIN
   if ((vfs_session = vfs_open_session()) != NULL) {
     vfs_root = vfs_getmount(vfs_session, "/");
     vfs_close_session(vfs_session);
@@ -596,6 +599,9 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
   } else {
     pumpkin_module.registry = AppRegistryInit(REGISTRY_DB);
   }
+#else
+  pumpkin_module.registry = AppRegistryInit(REGISTRY_DB);
+#endif
 
   pumpkin_module.num_notif = 0;
   AppRegistryEnum(pumpkin_module.registry, SysNotifyLoadCallback, 0, appRegistryNotification, NULL);
@@ -603,6 +609,7 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
   emupalmos_init();
   if (ap && ap->mixer_init) ap->mixer_init();
 
+#ifdef DARWIN
   if (vfs_root != NULL) {
     sys_snprintf(buf, sizeof(buf)-1, "%s%s", vfs_root, CRASH_LOG);
     if ((fd = sys_open(buf, SYS_WRITE)) == -1) {
@@ -613,6 +620,11 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
       fd = sys_create(buf, SYS_WRITE, 0644);
     }
   }
+#else
+  if ((fd = sys_open(CRASH_LOG, SYS_WRITE)) == -1) {
+    fd = sys_create(CRASH_LOG, SYS_WRITE, 0644);
+  }
+#endif
   if (fd != -1) {
     sys_close(fd);
   }
@@ -3464,12 +3476,15 @@ void pumpkin_compat_log(void) {
 void pumpkin_crash_log(UInt32 creator, int code, char *msg) {
   char buf[256], st[8];
   int fd;
+#ifdef DARWIN
   vfs_session_t *vfs_session;
   char *vfs_root;
+#endif
 
   pumpkin_id2s(creator, st);
   debug(DEBUG_INFO, "CRASH", "%s;%d;%s", st, code, msg);
 
+#ifdef DARWIN
   if ((vfs_session = vfs_open_session()) != NULL) {
     if ((vfs_root = vfs_getmount(vfs_session, "/")) != NULL) {
       sys_snprintf(buf, sizeof(buf)-1, "%s%s", vfs_root, CRASH_LOG);
@@ -3485,6 +3500,17 @@ void pumpkin_crash_log(UInt32 creator, int code, char *msg) {
     }
     vfs_close_session(vfs_session);
   }
+#else
+  if (mutex_lock(mutex) == 0) {
+    if ((fd = sys_open(CRASH_LOG, SYS_WRITE)) != -1) {
+      sys_seek(fd, 0, SYS_SEEK_END);
+      sys_snprintf(buf, sizeof(buf)-1, "%s;%d;%s\n", st, code, msg);
+      sys_write(fd, (uint8_t *)buf, sys_strlen(buf));
+      sys_close(fd);
+    }
+    mutex_unlock(mutex);
+  }
+#endif
 }
 
 UInt32 pumpkin_s2id(UInt32 *ID, char *s) {

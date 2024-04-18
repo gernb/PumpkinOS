@@ -1114,7 +1114,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "#find .. -name \"*.o\" -delete\n../mk.sh Darwin 64 clean\n";
+			shellScript = "cd ..\n./mk.sh Darwin 64 clean\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
