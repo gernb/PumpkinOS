@@ -105,7 +105,7 @@ struct ContentView: View {
             }
         }
         .task {
-            guard let events = await WindowProvider.events?.subscribe() else { return }
+            let events = await pit.windowProvider.events.subscribe()
             for await event in events {
                 switch event {
                 case .setTitle, .draw:

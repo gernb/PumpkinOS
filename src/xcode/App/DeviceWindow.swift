@@ -23,28 +23,28 @@ struct DeviceWindow: View {
                     DragGesture(minimumDistance: 0)
                         .onChanged { event in
                             if isDragging {
-                                WindowProvider.mouseMove(to: event.location)
+                                pit.windowProvider.mouseMove(to: event.location)
                             } else {
-                                WindowProvider.mouseDown(at: event.location)
+                                pit.windowProvider.mouseDown(at: event.location)
                                 isDragging = true
                             }
                         }
                         .onEnded { event in
-                            WindowProvider.mouseUp(at: event.location)
+                            pit.windowProvider.mouseUp(at: event.location)
                             isDragging = false
                         }
                 )
                 .onKeyPress(phases: .all) { keyPress in
-                    WindowProvider.keyEvent(keyPress)
+                    pit.windowProvider.keyEvent(keyPress)
                     return .handled
                 }
             Divider()
             HStack(spacing: 30) {
                 Button("Home", systemImage: "house.circle") {
-                    WindowProvider.keyEvent(.home)
+                    pit.windowProvider.keyEvent(.home)
                 }
                 Button("Menu", systemImage: "filemenu.and.selection") {
-                    WindowProvider.keyEvent(.menu)
+                    pit.windowProvider.keyEvent(.menu)
                 }
             }
             .padding(5)
@@ -63,7 +63,7 @@ struct DeviceWindow: View {
             }
         }
         .task {
-            guard let events = await WindowProvider.events?.subscribe() else { return }
+            let events = await pit.windowProvider.events.subscribe()
             for await event in events {
                 switch event {
                 case .setTitle(_, let title):

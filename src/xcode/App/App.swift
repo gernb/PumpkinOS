@@ -12,10 +12,6 @@ struct PumpkinApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     private let pit = Pit()
 
-    init() {
-        WindowProvider.initialize()
-    }
-
     var body: some Scene {
         WindowGroup {
             ContentView()

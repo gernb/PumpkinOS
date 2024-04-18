@@ -8,7 +8,7 @@ import Foundation
 import OSLog
 import SwiftUI
 
-struct WindowProvider {
+final class WindowProvider: Sendable {
     enum Event: Sendable {
         case createWindow(Window)
         case destroyWindow(Window)
@@ -30,26 +30,24 @@ struct WindowProvider {
         case menu
     }
 
-    @MainActor
-    static private(set) var events: AsyncSharedStream<Event>?
-    @MainActor
-    private static var publisher: AsyncStream<Event>.Continuation?
-    private static var inputEvents: [Input] = []
+    let events: AsyncSharedStream<Event>
+    private let publisher: AsyncStream<Event>.Continuation
+    private var inputEvents: [Input] = []
 
-    @MainActor
-    static func initialize() {
+    init() {
         let (events, publisher) = AsyncStream<Event>.makeStream()
         self.events = .init(events)
         self.publisher = publisher
+        self.wp.data = Unmanaged.passUnretained(self).toOpaque()
     }
 
     @MainActor
-    static func reset() {
+    func reset() {
         inputEvents.removeAll()
     }
 
     @MainActor
-    static func keyEvent(_ key: Key) {
+    func keyEvent(_ key: Key) {
         let code = switch key {
         case .home: WINDOW_KEY_HOME
         case .menu: WINDOW_KEY_F5
@@ -59,7 +57,7 @@ struct WindowProvider {
     }
 
     @MainActor
-    static func keyEvent(_ keyPress: KeyPress) {
+    func keyEvent(_ keyPress: KeyPress) {
         let code: Int32 = switch keyPress.key {
         case .tab: 9
         case .home: WINDOW_KEY_HOME
@@ -90,28 +88,28 @@ struct WindowProvider {
     }
 
     @MainActor
-    static func mouseDown(at location: CGPoint) {
+    func mouseDown(at location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
         inputEvents.append(.mouseDown)
     }
 
     @MainActor
-    static func mouseMove(to location: CGPoint) {
+    func mouseMove(to location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
     }
 
     @MainActor
-    static func mouseUp(at location: CGPoint) {
+    func mouseUp(at location: CGPoint) {
         inputEvents.append(.mouseMove(x: Int32(location.x), y: Int32(location.y)))
         inputEvents.append(.mouseUp)
     }
 
     @MainActor
-    static func stop() {
+    func stop() {
         inputEvents.append(.stop)
     }
 
-    static func create(
+    private static func create(
         encoding: Int32,
         widthPtr: UnsafeMutablePointer<Int32>?,
         heightPtr: UnsafeMutablePointer<Int32>?,
@@ -122,33 +120,36 @@ struct WindowProvider {
         software: Int32,
         dataPtr: UnsafeMutableRawPointer?
     ) -> UnsafeMutablePointer<window_t?>? {
+        guard let dataPtr else { return nil }
+        let windowProvider: WindowProvider = Unmanaged.fromOpaque(dataPtr).takeUnretainedValue()
         let width = widthPtr?.pointee ?? 0
         let height = heightPtr?.pointee ?? 0
         let window = Window(
             encoding: encoding,
             width: width,
-            height: height
+            height: height,
+            provider: windowProvider
         )
         Logger.wp.debug("Create window: \(window.id); encoding=\(encoding), width=\(width), height=\(height)")
         Task { @MainActor in
-            _ = publisher?.yield(.createWindow(window))
+            _ = windowProvider.publisher.yield(.createWindow(window))
         }
         return Unmanaged.passRetained(window).toOpaque().assumingMemoryBound(to: window_t?.self)
     }
 
-    static func destroy(
+    private static func destroy(
         windowPtr: UnsafeMutablePointer<window_t?>?
     ) -> Int32 {
         guard let windowPtr else { return -1 }
         let window: Window = Unmanaged.fromOpaque(UnsafeRawPointer(windowPtr)).takeRetainedValue()
         Logger.wp.debug("Destroy window: \(window.id)")
         Task { @MainActor in
-            _ = publisher?.yield(.destroyWindow(window))
+            _ = window.provider?.publisher.yield(.destroyWindow(window))
         }
         return 0
     }
 
-    static func title(
+    private static func title(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         titlePtr: UnsafeMutablePointer<CChar>?
     ) {
@@ -158,11 +159,11 @@ struct WindowProvider {
         Logger.wp.debug("Title window: \(window.id); '\(title)'")
         window.title = title
         Task { @MainActor in
-            _ = publisher?.yield(.setTitle(window, title))
+            _ = window.provider?.publisher.yield(.setTitle(window, title))
         }
     }
 
-    static func createTexture(
+    private static func createTexture(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         width: Int32,
         height: Int32
@@ -174,7 +175,7 @@ struct WindowProvider {
         return .init(Unmanaged.passRetained(texture).toOpaque())
     }
 
-    static func destroyTexture(
+    private static func destroyTexture(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         texturePtr: OpaquePointer?
     ) -> Int32 {
@@ -184,7 +185,7 @@ struct WindowProvider {
         return 0
     }
 
-    static func updateTexture(
+    private static func updateTexture(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         texturePtr: OpaquePointer?,
         rawPtr: UnsafeMutablePointer<UInt8>?
@@ -199,7 +200,7 @@ struct WindowProvider {
         return 0
     }
 
-    static func updateTexture(
+    private static func updateTexture(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         texturePtr: OpaquePointer?,
         srcPtr: UnsafeMutablePointer<UInt8>?,
@@ -231,7 +232,7 @@ struct WindowProvider {
         return 0
     }
 
-    static func drawTexture(
+    private static func drawTexture(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         texturePtr: OpaquePointer?,
         tx: Int32,
@@ -290,19 +291,24 @@ struct WindowProvider {
             }
         }
         Task { @MainActor in
-            _ = publisher?.yield(.draw(window))
+            _ = window.provider?.publisher.yield(.draw(window))
         }
         return 0
     }
 
-    static func event2(
+    private static func event2(
         windowPtr: UnsafeMutablePointer<window_t?>?,
         wait: Int32,
         arg1Ptr: UnsafeMutablePointer<Int32>?,
         arg2Ptr: UnsafeMutablePointer<Int32>?
     ) -> Int32 {
-        guard inputEvents.isEmpty == false else { return 0 }
-        let event = inputEvents.removeFirst()
+        guard
+            let window = windowPtr.map({ Unmanaged.fromOpaque(UnsafeRawPointer($0)).takeUnretainedValue() as Window }),
+            let isEmpty = window.provider?.inputEvents.isEmpty,
+            isEmpty == false,
+            let event = window.provider?.inputEvents.removeFirst()
+        else { return 0 }
+
         switch event {
         case .keyDown(let code):
             Logger.wp.debug("Window key down: \(code)")
@@ -332,23 +338,30 @@ struct WindowProvider {
     }
 
     final class Window: Codable, Hashable, Sendable {
-        let id = UUID()
+        let id: UUID
         let encoding: Int32
         let width: Int32
         let height: Int32
+        var provider: WindowProvider?
         var title: String?
         let size: Int
         var buffer: [UInt8]
 
         var pixelSize: Int32 { 4 }
 
-        init(encoding: Int32, width: Int32, height: Int32) {
+        init(encoding: Int32, width: Int32, height: Int32, provider: WindowProvider? = nil) {
             assert(encoding == ENC_RGBA, "Only RGBA is currently supported")
+            self.id = UUID()
             self.encoding = encoding
             self.width = width
             self.height = height
+            self.provider = provider
             self.size = Int(width * height) * 4
             self.buffer = Array(repeating: 0, count: size)
+        }
+
+        private enum CodingKeys: CodingKey {
+            case id, encoding, width, height, title, size, buffer
         }
 
         static func == (lhs: Window, rhs: Window) -> Bool {
@@ -376,4 +389,27 @@ struct WindowProvider {
             self.buffer = Array(repeating: 0, count: size)
         }
     }
+
+    var wp = window_provider_t(
+        create: { WindowProvider.create(encoding: $0, widthPtr: $1, heightPtr: $2, xfactor: $3, yfactor: $4, rotate: $5, fullscreen: $6, software: $7, dataPtr: $8) },
+        event: nil,
+        destroy: { WindowProvider.destroy(windowPtr: $0) },
+        erase: nil,
+        render: nil,
+        background: nil,
+        create_texture: { WindowProvider.createTexture(windowPtr: $0, width: $1, height: $2) },
+        destroy_texture: { WindowProvider.destroyTexture(windowPtr: $0, texturePtr: $1) },
+        update_texture: { WindowProvider.updateTexture(windowPtr: $0, texturePtr: $1, rawPtr: $2) },
+        draw_texture: nil,
+        status: nil,
+        title: { WindowProvider.title(windowPtr: $0, titlePtr: $1) },
+        clipboard: nil,
+        event2: { WindowProvider.event2(windowPtr: $0, wait: $1, arg1Ptr: $2, arg2Ptr: $3) },
+        update: nil,
+        draw_texture_rect: { WindowProvider.drawTexture(windowPtr: $0, texturePtr: $1, tx: $2, ty: $3, w: $4, h: $5, x: $6, y: $7) },
+        update_texture_rect: { WindowProvider.updateTexture(windowPtr: $0, texturePtr: $1, srcPtr: $2, tx: $3, ty: $4, w: $5, h: $6) },
+        move: nil,
+        average: nil,
+        data: nil
+    )
 }
