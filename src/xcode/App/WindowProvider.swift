@@ -131,9 +131,7 @@ final class WindowProvider: Sendable {
             provider: windowProvider
         )
         Logger.wp.debug("Create window: \(window.id); encoding=\(encoding), width=\(width), height=\(height)")
-        Task { @MainActor in
-            _ = windowProvider.publisher.yield(.createWindow(window))
-        }
+        windowProvider.publisher.yield(.createWindow(window))
         return Unmanaged.passRetained(window).toOpaque().assumingMemoryBound(to: window_t?.self)
     }
 
@@ -143,9 +141,7 @@ final class WindowProvider: Sendable {
         guard let windowPtr else { return -1 }
         let window: Window = Unmanaged.fromOpaque(UnsafeRawPointer(windowPtr)).takeRetainedValue()
         Logger.wp.debug("Destroy window: \(window.id)")
-        Task { @MainActor in
-            _ = window.provider?.publisher.yield(.destroyWindow(window))
-        }
+        window.provider?.publisher.yield(.destroyWindow(window))
         return 0
     }
 
@@ -158,9 +154,7 @@ final class WindowProvider: Sendable {
         let title = String(cString: titlePtr)
         Logger.wp.debug("Title window: \(window.id); '\(title)'")
         window.title = title
-        Task { @MainActor in
-            _ = window.provider?.publisher.yield(.setTitle(window, title))
-        }
+        window.provider?.publisher.yield(.setTitle(window, title))
     }
 
     private static func createTexture(
@@ -290,9 +284,7 @@ final class WindowProvider: Sendable {
                 }
             }
         }
-        Task { @MainActor in
-            _ = window.provider?.publisher.yield(.draw(window))
-        }
+        window.provider?.publisher.yield(.draw(window))
         return 0
     }
 
