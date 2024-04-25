@@ -2,7 +2,7 @@
 
 if [ $# -lt 2 ]; then
   echo "usage: $0 <OS> <BITS> [ <TARGET> ]"
-  echo " <OS> must be Msys, GNU/Linux or Serenity"
+  echo " <OS> must be Msys, GNU/Linux, Serenity, or Beepy"
   echo " <BITS> must be 64 or 32"
   echo " <TARGET> must be empty or clean"
   exit 0
@@ -33,6 +33,10 @@ elif [ $OSNAME = "Serenity" ]; then
 elif [ $OSNAME = "Darwin" ]; then
   SDL2=
   GUI=
+elif [ $OSNAME = "Beepy" ]; then
+  OSNAME="GNU/Linux"
+  SDL2=libfb
+  GUI=linux
 else
   echo "Invalid OS parameter"
   exit 1

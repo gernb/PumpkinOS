@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/input.h>
+#include <linux/input-event-codes.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/select.h>
@@ -20,13 +21,14 @@
 
 typedef struct {
   int fb_num, kbd_num, mouse_num;
-  int width, height, depth;
+  int width, height, depth, line_length;
   int fb_fd, kbd_fd, mouse_fd, len;
   int xmin, xmax, ymin, ymax;
   int x, y, buttons, button_down;
   uint16_t *p16;
   uint32_t *p32;
   void *p;
+  void *offscreen;
 } fb_t;
 
 struct texture_t {
@@ -38,13 +40,34 @@ struct texture_t {
 static window_provider_t wp;
 static fb_t fb;
 
+static void put_pixel(int x, int y, uint32_t c, fb_t *fb) {
+  if ((x < fb->xmin) || (x >= fb->xmax) || (y < fb->ymin) || (y >= fb->ymax)) {
+    return;
+  }
+
+  // calculate the pixel's byte offset inside the buffer
+  unsigned int pix_offset = ((x * fb->depth / 8) + (y * fb->line_length));
+//  printf("put_pixel: x=%d, y=%d, c=%02X, offset=%d\n", x, y, c, pix_offset);
+  *((uint32_t*)(fb->p + pix_offset)) = c;
+}
+
+static void draw_pointer(fb_t *fb) {
+  memcpy(fb->p, fb->offscreen, fb->len);
+  const int size = 3;
+  for(int y = fb->y - size; y <= fb->y + size; y++) {
+    for(int x = fb->x - size; x <= fb->x + size; x++) {
+      put_pixel(x, y, 0, fb);
+    }
+  }
+}
+
 // 2021-04-29 17:13:12.516 I 10910 PalmOS   INPUT: 0000: 28 E9 8A 60 3F C9 07 00 01 00 4A 01 01 00 00 00
 // 2021-04-29 17:13:12.516 I 10910 PalmOS   INPUT: 0010: 28 E9 8A 60 3F C9 07 00 03 00 00 00 12 03 00 00
 // 2021-04-29 17:13:12.516 I 10910 PalmOS   INPUT: 0020: 28 E9 8A 60 3F C9 07 00 03 00 01 00 2D 0D 00 00
 // 2021-04-29 17:13:12.516 I 10910 PalmOS   INPUT: 0030: 28 E9 8A 60 3F C9 07 00 03 00 18 00 85 00 00 00
 // 2021-04-29 17:13:12.516 I 10910 PalmOS   INPUT: 0040: 28 E9 8A 60 3F C9 07 00 00 00 00 00 00 00 00 00
 
-static int input_event(fb_t *fb, uint32_t us, int *x, int *y, int *button) {
+static int input_event(fb_t *fb, uint32_t us, int *x, int *y, int *button, int* keyCode) {
   uint8_t buf[24];
   uint32_t value;
   int32_t ivalue;
@@ -121,6 +144,10 @@ static int input_event(fb_t *fb, uint32_t us, int *x, int *y, int *button) {
                   down = value ? 1 : 0;
                   hast = 1;
                   break;
+		case KEY_ESC:
+                  ev = value ? WINDOW_KEYDOWN : WINDOW_KEYUP;
+		  *keyCode = WINDOW_KEY_HOME;
+                  break;
               }
               break;
             case 0x02: // EV_REL
@@ -141,6 +168,7 @@ static int input_event(fb_t *fb, uint32_t us, int *x, int *y, int *button) {
                     hasy = 1;
                     break;
                 }
+		draw_pointer(fb);
                 break;
               case 0x03: // EV_ABS
                 switch (code) {
@@ -233,6 +261,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           fb->kbd_fd = kbd_fd;
           fb->mouse_fd = mouse_fd;
           fb->p = p;
+	  fb->offscreen = xmalloc(finfo.smem_len);
           fb->width = vinfo.xres;
           fb->height = vinfo.yres;
           fb->xmin = xmin;
@@ -242,11 +271,12 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           fb->x = fb->width / 2;
           fb->y = fb->height / 2;
           fb->depth = vinfo.bits_per_pixel;
+	  fb->line_length = finfo.line_length;
           fb->len = finfo.smem_len;
           if (fb->depth == 16) {
-            fb->p16 = p;
+            fb->p16 = fb->offscreen;
           } else {
-            fb->p32 = p;
+            fb->p32 = fb->offscreen;
           }
           *width = fb->width;
           *height = fb->height;
@@ -285,6 +315,7 @@ static int window_destroy(window_t *window) {
     if (fb->mouse_fd > 0 && fb->mouse_fd != fb->kbd_fd) {
       close(fb->mouse_fd);
     }
+    if (fb->offscreen) xfree(fb->offscreen);
 
     fb->fb_fd = 0;
     fb->kbd_fd = 0;
@@ -419,6 +450,7 @@ static int window_draw_texture_rect(window_t *window, texture_t *texture, int tx
         tindex += tpitch;
         windex += wpitch;
       }
+      draw_pointer(fb);
       r = 0;
     }
   }
@@ -438,7 +470,7 @@ static int window_draw_texture(window_t *window, texture_t *texture, int x, int 
 
 static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   fb_t *fb = (fb_t *)window;
-  int button, ev = 0;
+  int button, code, ev = 0;
 
   if (fb->kbd_fd > 0) {
     if (fb->button_down) {
@@ -448,7 +480,7 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
       *arg2 = 0;
       fb->button_down = 0;
     } else {
-      ev = input_event(fb, wait, arg1, arg2, &button);
+      ev = input_event(fb, wait, arg1, arg2, &button, &code);
       switch (ev) {
         case WINDOW_BUTTONDOWN:
           debug(DEBUG_TRACE, "FB", "changing first button down into motion");
@@ -459,6 +491,11 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
           *arg1 = button;
           *arg2 = 0;
           break;
+	case WINDOW_KEYDOWN:
+	case WINDOW_KEYUP:
+	  *arg1 = code;
+	  *arg2 = 0;
+	  break;
       }
     }
   }
