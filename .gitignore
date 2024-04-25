@@ -2,6 +2,7 @@
 /vfs/app_install
 /vfs/app_storage
 /vfs/app_card/PALM/Programs/*
+/vfs/registry
 /tools
 /registry
 /pumpkin

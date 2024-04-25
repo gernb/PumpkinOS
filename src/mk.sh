@@ -17,6 +17,8 @@ ROOT=$DIR/..
 PATH=$ROOT/bin:$PATH
 export LD_LIBRARY_PATH=$ROOT/bin
 
+DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage registry"
+
 if [ $OSNAME = "Msys" ]; then
   SDL2=
   GUI=windows
@@ -34,15 +36,15 @@ elif [ $OSNAME = "Darwin" ]; then
   SDL2=
   GUI=
 elif [ $OSNAME = "Beepy" ]; then
-  OSNAME="GNU/Linux"
-  SDL2=libfb
+  SDL2=libbeepy
   GUI=linux
+  DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage vfs/registry"
 else
   echo "Invalid OS parameter"
   exit 1
 fi
 
-for dir in bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage registry
+for dir in $DIRECTORIES
 do
   if [ ! -d $ROOT/$dir ]; then
     echo "creating directory $dir"

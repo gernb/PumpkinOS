@@ -6,8 +6,7 @@ end
 
 pit.cleanup(cleanup_callback)
 
-wp = pit.loadlib("libfb")
-wp.setup(1, 0, 1)
+wp = pit.loadlib("libbeepy")
 
 if not wp then
   print("window provider not found")
