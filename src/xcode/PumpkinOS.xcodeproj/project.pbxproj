@@ -552,6 +552,12 @@
 		442E5C912BCDEC7400E4445D /* libscriptlua.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libscriptlua.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		442E5C972BCE06D900E4445D /* libos.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libos.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		442E5C9B2BCE114B00E4445D /* Pit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pit.swift; sourceTree = "<group>"; };
+		4446DC8D2BDC0C36002FFB0D /* libbeepy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libbeepy.c; sourceTree = "<group>"; };
+		4446DC8E2BDC0C36002FFB0D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		4446DC902BDC0C3F002FFB0D /* libfb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libfb.c; sourceTree = "<group>"; };
+		4446DC912BDC0C3F002FFB0D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		4446DC932BDC0C4D002FFB0D /* liblsdl2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = liblsdl2.c; sourceTree = "<group>"; };
+		4446DC942BDC0C4D002FFB0D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		44C5B6F72BCDC55E0043DD3E /* pilrc */ = {isa = PBXFileReference; lastKnownFileType = folder; name = pilrc; path = ../pilrc; sourceTree = "<group>"; };
 		44C5B6F82BCDC6A90043DD3E /* Project-Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Project-Debug.xcconfig"; sourceTree = "<group>"; };
 		44C5B6F92BCDC6A90043DD3E /* Makefile-Shared.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Makefile-Shared.xcconfig"; sourceTree = "<group>"; };
@@ -613,6 +619,36 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4446DC8F2BDC0C36002FFB0D /* libbeepy */ = {
+			isa = PBXGroup;
+			children = (
+				4446DC8D2BDC0C36002FFB0D /* libbeepy.c */,
+				4446DC8E2BDC0C36002FFB0D /* Makefile */,
+			);
+			name = libbeepy;
+			path = ../libbeepy;
+			sourceTree = "<group>";
+		};
+		4446DC922BDC0C3F002FFB0D /* libfb */ = {
+			isa = PBXGroup;
+			children = (
+				4446DC902BDC0C3F002FFB0D /* libfb.c */,
+				4446DC912BDC0C3F002FFB0D /* Makefile */,
+			);
+			name = libfb;
+			path = ../libfb;
+			sourceTree = "<group>";
+		};
+		4446DC952BDC0C4D002FFB0D /* liblsdl2 */ = {
+			isa = PBXGroup;
+			children = (
+				4446DC932BDC0C4D002FFB0D /* liblsdl2.c */,
+				4446DC942BDC0C4D002FFB0D /* Makefile */,
+			);
+			name = liblsdl2;
+			path = ../liblsdl2;
+			sourceTree = "<group>";
+		};
 		44C5B6EC2BCDC4570043DD3E = {
 			isa = PBXGroup;
 			children = (
@@ -636,6 +672,9 @@
 				44D8F64A2BCEA9FC00E3127F /* BOOT */,
 				44D8F6572BCF260400E3127F /* PalmOS */,
 				44C5B7282BCDD5810043DD3E /* libos */,
+				4446DC8F2BDC0C36002FFB0D /* libbeepy */,
+				4446DC922BDC0C3F002FFB0D /* libfb */,
+				4446DC952BDC0C4D002FFB0D /* liblsdl2 */,
 				44C5B71F2BCDD4960043DD3E /* libpumpkin */,
 				44C5B70C2BCDD2E90043DD3E /* lua */,
 				44C5B7062BCDCFF30043DD3E /* libpit */,
