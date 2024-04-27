@@ -38,7 +38,11 @@
 #include "xalloc.h"
 
 #ifndef DEFAULT_DENSITY
+#ifdef BEEPY
+#define DEFAULT_DENSITY kDensityLow
+#else
 #define DEFAULT_DENSITY kDensityDouble
+#endif
 #endif
 
 #ifndef DEFAULT_DEPTH
