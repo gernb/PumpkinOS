@@ -551,6 +551,24 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   return ev;
 }
 
+static int libbeepy_start(int pe) {
+  int r = -1;
+
+  debug(DEBUG_INFO, "BEEPY", "start");
+  r = 0;
+
+  return r;
+}
+
+static int libbeepy_finish(int pe) {
+  int r = -1;
+
+  debug(DEBUG_INFO, "BEEPY", "finish");
+  r = 0;
+
+  return r;
+}
+
 int libbeepy_init(int pe, script_ref_t obj) {
   xmemset(&beepy_state, 0, sizeof(beepy_state_t));
   beepy_state.window_count = 0;
@@ -568,6 +586,9 @@ int libbeepy_init(int pe, script_ref_t obj) {
 
   debug(DEBUG_INFO, "BEEPY", "registering provider %s", WINDOW_PROVIDER);
   script_set_pointer(pe, WINDOW_PROVIDER, &wp);
+
+  script_add_function(pe, obj, "start", libbeepy_start);
+  script_add_function(pe, obj, "finish", libbeepy_finish);
 
   return 0;
 }

@@ -1,4 +1,7 @@
 function cleanup_callback()
+  if wp then
+    wp.finish()
+  end
   if pumpkin then
     pumpkin.finish()
   end
@@ -13,6 +16,8 @@ if not wp then
   pit.finish(0)
   return
 end
+
+wp.start()
 
 pit.mount("./vfs/", "/")
 
