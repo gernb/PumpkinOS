@@ -224,7 +224,7 @@ final class WindowProvider: Sendable {
             for _ in 0 ..< h {
                 dest.copyMemory(from: src)
                 let destAddr = dest.baseAddress!.advanced(by: pitch)
-                dest = UnsafeMutableRawBufferPointer(start: destAddr, count: dest.count - pitch)
+                dest = UnsafeMutableRawBufferPointer(start: destAddr, count: max(dest.count - pitch, 0))
                 let srcAddr = src.baseAddress!.advanced(by: pitch)
                 src = UnsafeRawBufferPointer(start: srcAddr, count: len)
             }
