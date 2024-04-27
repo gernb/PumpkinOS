@@ -154,6 +154,7 @@ LUAPLAT=linux
 OS=Linux
 OSDEFS=$(MBITS) -DLINUX -DBEEPY -DSOEXT=\"$(SOEXT)\"
 CC=gcc
+PILRCFLAGS=-D BEEPY
 else
 $(error Unknown OS $(OSNAME))
 endif

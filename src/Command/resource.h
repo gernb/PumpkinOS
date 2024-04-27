@@ -22,3 +22,9 @@
 
 #define frmScrpID 1000
 #define frmScrpMenu 2001
+
+#ifdef BEEPY
+#define winSize "0x03 0x20 0x01 0xE0"
+#else
+#define winSize "0x02 0x80 0x01 0x5E"
+#endif
