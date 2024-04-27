@@ -72,7 +72,7 @@ static const char pointer[] =
 ..##############..\n\
 ..###############..\n\
 ..################..\n\
-..######..\n\
+..######...........\n\
 ..#####..\n\
 ..####..\n\
 ..###..\n\
@@ -421,7 +421,7 @@ static int map_keycode(uint16_t code, display_t *d) {
   if (key == 0) {
     debug(DEBUG_ERROR, "BEEPY", "map_keycode: %d (%04X) -> UNHANDLED)", code, code);
   } else {
-    debug(DEBUG_INFO, "BEEPY", "map_keycode: %d (%04X) -> %d)", code, code, key);
+    debug(DEBUG_TRACE, "BEEPY", "map_keycode: %d (%04X) -> %d)", code, code, key);
   }
   return key;
 }
@@ -494,21 +494,21 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
                   *arg2 = display->y;
                   break;
                 case KEY_LEFTSHIFT:
-                  debug(DEBUG_INFO, "BEEPY", "SHIFT key: %d", value);
+                  debug(DEBUG_TRACE, "BEEPY", "SHIFT key: %d", value);
                   display->key_shift = value;
                   ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_SHIFT;
                   *arg2 = 0;
                   break;
                 case KEY_LEFTCTRL:
-                  debug(DEBUG_INFO, "BEEPY", "CTRL key: %d", value);
+                  debug(DEBUG_TRACE, "BEEPY", "CTRL key: %d", value);
                   display->key_ctrl = value;
                   ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_CTRL;
                   *arg2 = 0;
                   break;
                 case KEY_RIGHTALT:
-                  debug(DEBUG_INFO, "BEEPY", "SYM key: %d", value);
+                  debug(DEBUG_TRACE, "BEEPY", "SYM key: %d", value);
                   display->key_sym = value;
                   ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_RALT;

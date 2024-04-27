@@ -6,6 +6,10 @@ ifeq ($(OSNAME),GNU/Linux)
 OSHELL=oshell.o
 endif
 
+ifeq ($(OSNAME),Beepy)
+OSHELL=oshell.o
+endif
+
 ifeq ($(OSNAME),Xcode)
 OSHELL=oshell.o
 endif

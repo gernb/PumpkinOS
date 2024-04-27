@@ -39,6 +39,7 @@ elif [ $OSNAME = "Beepy" ]; then
   SDL2=libbeepy
   GUI=linux
   DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage vfs/registry"
+  ADDITIONAL_MODULES="liboshell"
 else
   echo "Invalid OS parameter"
   exit 1
@@ -61,7 +62,7 @@ do
   fi
 done
 
-for dir in libpit lua $SDL2 libpumpkin libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook
+for dir in libpit lua $SDL2 libpumpkin libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook $ADDITIONAL_MODULES
 do
   if [ -d $dir ]; then
     cd $dir
