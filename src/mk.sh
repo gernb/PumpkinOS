@@ -62,7 +62,7 @@ do
   fi
 done
 
-for dir in libpit lua $SDL2 libpumpkin libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook $ADDITIONAL_MODULES
+for dir in libpit lua libpumpkin $SDL2 libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook $ADDITIONAL_MODULES
 do
   if [ -d $dir ]; then
     cd $dir
