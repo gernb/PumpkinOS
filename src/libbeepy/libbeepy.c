@@ -14,6 +14,7 @@
 #include "bytes.h"
 #include "debug.h"
 #include "xalloc.h"
+#include "thread.h"
 
 typedef struct {
   int ev, arg1, arg2;
@@ -34,8 +35,11 @@ struct texture_t {
   uint32_t *pixels;
 };
 
+#define TAG_BATTERY_MONITOR  "battery_monitor"
+
 typedef struct {
   int window_count;
+  int battery_thread_handle;
 } beepy_state_t;
 
 static window_provider_t wp;
@@ -551,20 +555,60 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   return ev;
 }
 
+static int read_sysfs(char *path, uint8_t *buffer, int len) {
+  int nread;
+  int fd;
+
+  xmemset(buffer, 0, len);
+  fd = open(path, O_RDONLY);
+  if (fd == -1) {
+    debug(DEBUG_ERROR, "BEEPY", "Unable to open sysfs %s", path);
+    return -1;
+  }
+  sys_read_timeout(fd, buffer, len, &nread, 0);
+  debug(DEBUG_TRACE, "BEEPY", "read_sysfs read %d bytes", nread);
+  close(fd);
+  return 0;
+}
+
+static int monitor_action(void *arg) {
+  char buffer[12];
+  int battery;
+
+  for (; !thread_must_end();) {
+    if (read_sysfs("/sys/firmware/beepy/battery_percent", buffer, 12) == 0) {
+      battery = sys_atoi(buffer);
+      pumpkin_set_battery(battery);
+      debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
+    } else {
+      debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
+    }
+    sys_usleep(3000000); // sleep 3 seconds
+  }
+
+  return 0;
+}
+
 static int libbeepy_start(int pe) {
-  int r = -1;
+  int r = 0;
 
   debug(DEBUG_INFO, "BEEPY", "start");
-  r = 0;
+  if ((beepy_state.battery_thread_handle = thread_begin(TAG_BATTERY_MONITOR, monitor_action, NULL)) == -1) {
+    debug(DEBUG_ERROR, "BEEPY", "Failed to start battery monitor thread");
+    r = -1;
+  }
 
   return r;
 }
 
 static int libbeepy_finish(int pe) {
-  int r = -1;
+  int r = 0;
 
   debug(DEBUG_INFO, "BEEPY", "finish");
-  r = 0;
+  if (beepy_state.battery_thread_handle != -1) {
+    r = thread_end(TAG_BATTERY_MONITOR, beepy_state.battery_thread_handle);
+    beepy_state.battery_thread_handle = -1;
+  }
 
   return r;
 }
