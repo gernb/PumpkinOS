@@ -145,6 +145,16 @@ SRC=../
 VFS=$(SRC)/xcode/PumpkinVFS
 TOOLS=$(ROOT)
 LIBPIT=$(SRC)/libpit
+else ifeq ($(OSNAME),Beepy)
+OSNAME=GNU/Linux
+SYS_OS=1
+EXTLIBS=-lrt -ldl
+SOEXT=.so
+LUAPLAT=linux
+OS=Linux
+OSDEFS=$(MBITS) -DLINUX -DBEEPY -DSOEXT=\"$(SOEXT)\"
+CC=gcc
+PILRCFLAGS=-D BEEPY
 else
 $(error Unknown OS $(OSNAME))
 endif

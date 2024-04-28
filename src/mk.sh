@@ -2,7 +2,7 @@
 
 if [ $# -lt 2 ]; then
   echo "usage: $0 <OS> <BITS> [ <TARGET> ]"
-  echo " <OS> must be Msys, GNU/Linux or Serenity"
+  echo " <OS> must be Msys, GNU/Linux, Serenity, or Beepy"
   echo " <BITS> must be 64 or 32"
   echo " <TARGET> must be empty or clean"
   exit 0
@@ -16,6 +16,8 @@ DIR=`pwd`
 ROOT=$DIR/..
 PATH=$ROOT/bin:$PATH
 export LD_LIBRARY_PATH=$ROOT/bin
+
+DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage registry"
 
 if [ $OSNAME = "Msys" ]; then
   SDL2=
@@ -33,12 +35,17 @@ elif [ $OSNAME = "Serenity" ]; then
 elif [ $OSNAME = "Darwin" ]; then
   SDL2=
   GUI=
+elif [ $OSNAME = "Beepy" ]; then
+  SDL2=libbeepy
+  GUI=linux
+  DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage vfs/registry"
+  ADDITIONAL_MODULES="liboshell"
 else
   echo "Invalid OS parameter"
   exit 1
 fi
 
-for dir in bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage registry
+for dir in $DIRECTORIES
 do
   if [ ! -d $ROOT/$dir ]; then
     echo "creating directory $dir"
@@ -55,7 +62,7 @@ do
   fi
 done
 
-for dir in libpit lua $SDL2 libpumpkin libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook
+for dir in libpit lua libpumpkin $SDL2 libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook $ADDITIONAL_MODULES
 do
   if [ -d $dir ]; then
     cd $dir

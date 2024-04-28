@@ -79,7 +79,16 @@ DATA "LuaS" ID frmScrpID "form.lua"
 
 DATA "JsSc" ID 1 "command.js"
 
+#ifdef BEEPY
+
+HEX "wind" ID 1
+  0x03 0x20 0x01 0xE0
+
+#else
+
 HEX "wind" ID 1
   0x02 0x80 0x01 0x5E
+
+#endif
 
 VERSION "1.0"

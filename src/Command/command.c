@@ -1735,7 +1735,11 @@ static Err StartApplication(void *param) {
   VFSCurrentDir(1, idata->cwd, MAXCMD);
 
   WinScreenMode(winScreenModeGet, &swidth, &sheight, NULL, NULL);
+#ifdef BEEPY
+    font = idata->prefs.font - 9010;
+#else
   font = idata->prefs.font - 9000;
+#endif
   idata->font = font;
   old = FntSetFont(font);
   idata->fwidth = FntCharWidth('A');
