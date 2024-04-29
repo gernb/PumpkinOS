@@ -605,6 +605,7 @@
 		44D8F70C2BD168C600E3127F /* liboshell.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = liboshell.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		44D8F70D2BD168C600E3127F /* libshell.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libshell.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		44D8F70E2BD168C600E3127F /* libpumpkin.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libpumpkin.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		D1CFB69F2BDFE47C00A94FAD /* script */ = {isa = PBXFileReference; lastKnownFileType = folder; name = script; path = ../../script; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -681,6 +682,7 @@
 				44C5B7392BCDD9720043DD3E /* font */,
 				44C5B6F72BCDC55E0043DD3E /* pilrc */,
 				44C5B7012BCDCEF50043DD3E /* prcbuild */,
+				D1CFB69F2BDFE47C00A94FAD /* script */,
 				44C5B6FE2BCDC6B20043DD3E /* xcconfig */,
 				44C5B73F2BCDDA850043DD3E /* Products */,
 				44C5B7572BCDE2760043DD3E /* Frameworks */,
@@ -1742,6 +1744,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 44C5B7502BCDDB700043DD3E /* App-Debug.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 3BT8C43J94;
 			};
 			name = Debug;
 		};
@@ -1749,6 +1752,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 44C5B7512BCDDB700043DD3E /* App-Release.xcconfig */;
 			buildSettings = {
+				DEVELOPMENT_TEAM = 3BT8C43J94;
 			};
 			name = Release;
 		};

@@ -10,6 +10,11 @@ import OSLog
 
 @Observable
 final class Pit: Sendable {
+    enum Density: Int, CaseIterable {
+        case low = 1
+        case double = 2
+    }
+
     enum LogLevel: Int, CaseIterable, Codable {
         case error, info, debug
     }
@@ -54,7 +59,8 @@ final class Pit: Sendable {
         globalLogLevel: LogLevel = .info,
         moduleLogging: [ModuleLogLevel] = [],
         width: Int = 320,
-        height: Int = 320
+        height: Int = 320,
+        density: Density = .double
     ) {
         guard
             let templateURL = Bundle.main.url(forResource: "main", withExtension: "lua"),
@@ -66,6 +72,7 @@ final class Pit: Sendable {
         let script = template
             .replacingOccurrences(of: "{width}", with: "\(width)")
             .replacingOccurrences(of: "{height}", with: "\(height)")
+            .replacingOccurrences(of: "{density}", with: "\(density.rawValue)")
         do {
             try script.write(to: Constants.tempScript, atomically: true, encoding: .utf8)
         } catch {

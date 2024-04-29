@@ -37,14 +37,6 @@
 #include "debug.h"
 #include "xalloc.h"
 
-#ifndef DEFAULT_DENSITY
-#ifdef BEEPY
-#define DEFAULT_DENSITY kDensityLow
-#else
-#define DEFAULT_DENSITY kDensityDouble
-#endif
-#endif
-
 #ifndef DEFAULT_DEPTH
 #define DEFAULT_DEPTH 16
 #endif
@@ -229,6 +221,7 @@ typedef struct {
   event_t events[MAX_EVENTS];
   int nev, iev, oev;
   calibration_t calibration;
+  uint16_t density;
 } pumpkin_module_t;
 
 typedef union {
@@ -528,7 +521,7 @@ static void pumpkin_unload_fonts(void) {
   }
 }
 
-int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_provider_t *ap, bt_provider_t *bt, gps_parse_line_f gps_parse_line) {
+int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_provider_t *ap, bt_provider_t *bt, gps_parse_line_f gps_parse_line, uint16_t density) {
   int fd;
 #if defined(DARWIN) || defined(BEEPY)
   vfs_session_t *vfs_session;
@@ -581,6 +574,7 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
   pumpkin_module.dragging = -1;
   pumpkin_module.nextTaskId = 1;
   pumpkin_module.battery = 100;
+  pumpkin_module.density = density;
 
   StoRemoveLocks(APP_STORAGE);
 
@@ -726,7 +720,7 @@ int pumpkin_is_single(void) {
 
 int pumpkin_set_dia(int depth) {
   pumpkin_set_encoding(depth);
-  pumpkin_module.dia = dia_init(pumpkin_module.wp, pumpkin_module.w, pumpkin_module.encoding, depth, DEFAULT_DENSITY == kDensityDouble);
+  pumpkin_module.dia = dia_init(pumpkin_module.wp, pumpkin_module.w, pumpkin_module.encoding, depth, pumpkin_module.density == kDensityDouble);
   pumpkin_module.depth = depth;
 
   return pumpkin_module.dia ? 0 : -1;
@@ -846,7 +840,7 @@ int pumpkin_dia_kbd(void) {
 
   if (pumpkin_module.dia) {
     dia_get_graffiti_dimension(pumpkin_module.dia, &dw, &dh);
-    prev = WinSetCoordinateSystem(DEFAULT_DENSITY == kDensityDouble ? kCoordinatesDouble : kCoordinatesStandard);
+    prev = WinSetCoordinateSystem(pumpkin_module.density == kDensityDouble ? kCoordinatesDouble : kCoordinatesStandard);
     lower_wh  = WinCreateOffscreenWindow(dw, dh, nativeFormat, &err);
     upper_wh  = WinCreateOffscreenWindow(dw, dh, nativeFormat, &err);
     number_wh = WinCreateOffscreenWindow(dw, dh, nativeFormat, &err);
@@ -1233,9 +1227,9 @@ static int pumpkin_local_init(int i, texture_t *texture, char *name, int width, 
   task->lang = LanguageInit(language);
 
   UicInitModule();
-  BmpInitModule(DEFAULT_DENSITY);
-  WinInitModule(DEFAULT_DENSITY, pumpkin_module.tasks[i].width, pumpkin_module.tasks[i].height, DEFAULT_DEPTH, NULL);
-  FntInitModule(DEFAULT_DENSITY);
+  BmpInitModule(pumpkin_module.density);
+  WinInitModule(pumpkin_module.density, pumpkin_module.tasks[i].width, pumpkin_module.tasks[i].height, DEFAULT_DEPTH, NULL);
+  FntInitModule(pumpkin_module.density);
   FrmInitModule();
   InsPtInitModule();
   FldInitModule();
@@ -1622,7 +1616,7 @@ int pumpkin_launch(launch_request_t *request) {
       if (data->height >= pumpkin_module.height) {
         data->height = pumpkin_module.height;
         data->y = 0;
-        if (pumpkin_module.dia) data->height -= (DEFAULT_DENSITY == kDensityDouble) ? 160 : 80; // XXX
+        if (pumpkin_module.dia) data->height -= (pumpkin_module.density == kDensityDouble) ? 160 : 80; // XXX
       }
 
       data->index = index;
@@ -2964,7 +2958,7 @@ void pumpkin_screen_dirty(WinHandle wh, int x, int y, int w, int h) {
     r = &wh->windowBounds;
     sx = r->topLeft.x;
     sy = r->topLeft.y;
-    switch (DEFAULT_DENSITY) {
+    switch (pumpkin_module.density) {
       case kDensityDouble: sx *= 2; sy *= 2; break;
       default: break;
     }
@@ -3557,7 +3551,7 @@ char *pumpkin_id2s(UInt32 ID, char *s) {
 }
 
 int pumpkin_default_density(void) {
-  return DEFAULT_DENSITY;
+  return pumpkin_module.density;
 }
 
 Boolean SysLibNewRefNum68K(UInt32 type, UInt32 creator, UInt16 *refNum) {

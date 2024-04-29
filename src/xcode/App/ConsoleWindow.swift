@@ -11,6 +11,7 @@ struct ConsoleWindow: View {
     @AppStorage("moduleLogging") private var moduleLogging: [Pit.ModuleLogLevel] = []
     @AppStorage("width") private var width: Int = 650
     @AppStorage("height") private var height: Int = 492
+    @AppStorage("density") private var density: Pit.Density = .double
     @State private var showModuleLoggingPopover = false
     @State private var showResetAlert = false
     @State private var logLines: [LogLine] = []
@@ -49,6 +50,12 @@ struct ConsoleWindow: View {
                         TextField("Height", value: $height, format: .number, prompt: Text("Height"))
                     }
                     .frame(maxWidth: 150)
+
+                    Picker("Density", selection: $density) {
+                        ForEach(Pit.Density.allCases, id: \.self) { value in
+                            Text(value.label).tag(value)
+                        }
+                    }
                 }
                 .disabled(pit.running)
 
@@ -78,7 +85,7 @@ struct ConsoleWindow: View {
                     } else {
                         Button("Start") {
                             logLines.removeAll()
-                            pit.main(globalLogLevel: globalLogLevel, moduleLogging: moduleLogging, width: width, height: height)
+                            pit.main(globalLogLevel: globalLogLevel, moduleLogging: moduleLogging, width: width, height: height, density: density)
                         }
                     }
                 }
@@ -207,6 +214,15 @@ private extension LogLine.Level {
         case .info: .primary
         case .error: .red
         case .unknown: .orange
+        }
+    }
+}
+
+private extension Pit.Density {
+    var label: String {
+        switch self {
+        case .low: "Low"
+        case .double: "Double"
         }
     }
 }
