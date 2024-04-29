@@ -247,5 +247,21 @@ BEGIN
   FONT "fakeH.txt" DENSITY 144
 END
 
-HEX "wind" ID 1 
+#ifdef BEEPY
+
+HEX "wind" ID 1
+  0x03 0x20 0x01 0xE0
+
+#else
+#ifdef DARWIN
+
+HEX "wind" ID 1
+  0x03 0x20 0x01 0xE0
+
+#else
+
+HEX "wind" ID 1
   0x02 0x80 0x01 0xE0
+
+#endif
+#endif

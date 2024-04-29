@@ -145,6 +145,7 @@ SRC=../
 VFS=$(SRC)/xcode/PumpkinVFS
 TOOLS=$(ROOT)
 LIBPIT=$(SRC)/libpit
+PILRCFLAGS=-D DARWIN
 else ifeq ($(OSNAME),Beepy)
 OSNAME=GNU/Linux
 SYS_OS=1

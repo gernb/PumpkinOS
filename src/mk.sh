@@ -18,6 +18,7 @@ PATH=$ROOT/bin:$PATH
 export LD_LIBRARY_PATH=$ROOT/bin
 
 DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage registry"
+APPLICATIONS="Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook"
 
 if [ $OSNAME = "Msys" ]; then
   SDL2=
@@ -35,11 +36,12 @@ elif [ $OSNAME = "Serenity" ]; then
 elif [ $OSNAME = "Darwin" ]; then
   SDL2=
   GUI=
+  DIRECTORIES=
 elif [ $OSNAME = "Beepy" ]; then
   SDL2=libbeepy
   GUI=linux
   DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage vfs/registry"
-  ADDITIONAL_MODULES="liboshell"
+  APPLICATIONS="$APPLICATIONS liboshell"
 else
   echo "Invalid OS parameter"
   exit 1
@@ -62,7 +64,7 @@ do
   fi
 done
 
-for dir in libpit lua libpumpkin $SDL2 libos libshell $GUI BOOT Launcher Preferences Command Edit LuaSyntax MemoPad AddressBook ToDoList DateBook $ADDITIONAL_MODULES
+for dir in libpit lua libpumpkin $SDL2 libos libshell $GUI BOOT Launcher $APPLICATIONS
 do
   if [ -d $dir ]; then
     cd $dir
