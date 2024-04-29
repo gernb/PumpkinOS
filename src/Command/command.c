@@ -106,6 +106,14 @@ struct command_internal_data_t {
   command_prefs_t prefs;
 };
 
+#if defined(BEEPY) || defined(DARWIN)
+#define DEFAULT_FONT      font16x16Id
+#define DEFAULT_FONT_SEL  sel16x16
+#else
+#define DEFAULT_FONT      font8x14Id
+#define DEFAULT_FONT_SEL  sel8x14
+#endif
+
 static const RGBColorType defaultForeground = { 0, 0xFF, 0xFF, 0xFF };
 static const RGBColorType defaultBackground = { 0, 0x13, 0x32, 0x65 };
 static const RGBColorType defaultHighlight  = { 0, 0xFF, 0xFF, 0x80 };
@@ -858,7 +866,8 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
         case font6x10Id:  sel = sel6x10;  break;
         case font8x14Id:  sel = sel8x14;  break;
         case font8x16Id:  sel = sel8x16;  break;
-        default: sel = sel8x14; break;
+        case font16x16Id: sel = sel16x16; break;
+        default: sel = DEFAULT_FONT_SEL; break;
       }
       index = FrmGetObjectIndex(formP, sel);
       ctl = (ControlType *)FrmGetObjectPtr(formP, index);
@@ -872,12 +881,12 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
     case ctlSelectEvent:
       switch (event->data.ctlSelect.controlID) {
         case dflBtn:
-          idata->prefs.font = font8x14Id;
+          idata->prefs.font = DEFAULT_FONT;
           idata->prefs.foreground = defaultForeground;
           idata->prefs.background = defaultBackground;
           idata->prefs.highlight  = defaultHighlight;
           formP = FrmGetActiveForm();
-          index = FrmGetObjectIndex(formP, sel8x14);
+          index = FrmGetObjectIndex(formP, DEFAULT_FONT_SEL);
           ctl = (ControlType *)FrmGetObjectPtr(formP, index);
           CtlSetValue(ctl, 1);
           DrawColorGadget(formP, fgCtl, &idata->prefs.foreground);
@@ -892,6 +901,8 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
             idata->prefs.font = font8x14Id;
           } else if (ctlSelected(formP, sel8x16)) {
             idata->prefs.font = font8x16Id;
+          } else if (ctlSelected(formP, sel16x16)) {
+            idata->prefs.font = font16x16Id;
           }
 
           PrefSetAppPreferences(AppID, 1, 1, &idata->prefs, sizeof(command_prefs_t), true);
@@ -1720,7 +1731,7 @@ static Err StartApplication(void *param) {
 
   prefsSize = sizeof(command_prefs_t);
   if (PrefGetAppPreferences(AppID, 1, &idata->prefs, &prefsSize, true) == noPreferenceFound) {
-    idata->prefs.font = font8x14Id;
+    idata->prefs.font = DEFAULT_FONT;
     idata->prefs.foreground = defaultForeground;
     idata->prefs.background = defaultBackground;
     idata->prefs.highlight  = defaultHighlight;
@@ -1735,11 +1746,7 @@ static Err StartApplication(void *param) {
   VFSCurrentDir(1, idata->cwd, MAXCMD);
 
   WinScreenMode(winScreenModeGet, &swidth, &sheight, NULL, NULL);
-#ifdef BEEPY
-    font = idata->prefs.font - 9010;
-#else
   font = idata->prefs.font - 9000;
-#endif
   idata->font = font;
   old = FntSetFont(font);
   idata->fwidth = FntCharWidth('A');
