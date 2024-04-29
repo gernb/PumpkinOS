@@ -448,8 +448,6 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
     return ev;
   }
 
-  len = sizeof(struct timeval) + 8; // struct timeval can be 16 bytes or 24 bytes
-
   for (; ev == -1;) {
     FD_ZERO(&fds);
     FD_SET(display->kbd_fd, &fds);
@@ -570,16 +568,22 @@ static int read_sysfs(char *path, uint8_t *buffer, int len) {
 static int monitor_action(void *arg) {
   char buffer[12];
   int battery;
+  int count = 0;
+  const int sleep_time = 500000; // 0.5 seconds
+  const int check_secs = 3 * 1000000 / sleep_time; // every 3 seconds
 
   for (; !thread_must_end();) {
-    if (read_sysfs("/sys/firmware/beepy/battery_percent", buffer, 12) == 0) {
-      battery = sys_atoi(buffer);
-      pumpkin_set_battery(battery);
-      debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
-    } else {
-      debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
+    if (count == 0) {
+      if (read_sysfs("/sys/firmware/beepy/battery_percent", buffer, 12) == 0) {
+        battery = sys_atoi(buffer);
+        pumpkin_set_battery(battery);
+        debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
+      } else {
+        debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
+      }
     }
-    sys_usleep(3000000); // sleep 3 seconds
+    count = (count + 1) % check_secs;
+    sys_usleep(sleep_time);
   }
 
   return 0;

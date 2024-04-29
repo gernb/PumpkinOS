@@ -22,5 +22,5 @@ wp.start()
 pit.mount("./vfs/", "/")
 
 pumpkin = pit.loadlib("libos")
-pumpkin.init()
+pumpkin.init(1)
 pumpkin.start(400, 240, 32, false, false, false, "Launcher")

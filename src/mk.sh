@@ -41,7 +41,7 @@ elif [ $OSNAME = "Beepy" ]; then
   SDL2=libbeepy
   GUI=linux
   DIRECTORIES="bin lib tools vfs/app_card/PALM/Programs vfs/app_install vfs/app_storage vfs/registry"
-  APPLICATIONS="$(APPLICATIONS) liboshell"
+  APPLICATIONS="$APPLICATIONS liboshell"
 else
   echo "Invalid OS parameter"
   exit 1
