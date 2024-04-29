@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/select.h>
+#include <sys/inotify.h>
+#include <sys/param.h>
 
 #include "sys.h"
 #include "script.h"
@@ -17,13 +19,16 @@
 #include "xalloc.h"
 #include "thread.h"
 
+#include <PalmOS.h>
+#include "pumpkin.h"
+
 typedef struct {
   int ev, arg1, arg2;
 } stored_event_t;
 
 typedef struct {
   int width, height, depth, pitch;
-  int fb_fd, kbd_fd, mouse_fd, len;
+  int fb_fd, kbd_fd, mouse_fd, notify_fd, len;
   int x, y;
   uint32_t *offscreen;
   void *p;
@@ -37,10 +42,12 @@ struct texture_t {
 };
 
 #define TAG_BATTERY_MONITOR  "battery_monitor"
+#define MAX_PATH 256
 
 typedef struct {
   int window_count;
   int battery_thread_handle;
+  char app_install_path[MAX_PATH];
 } beepy_state_t;
 
 static window_provider_t wp;
@@ -105,7 +112,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
   display_t *display = xmalloc(sizeof(display_t));
   struct fb_var_screeninfo vinfo;
   struct fb_fix_screeninfo finfo;
-  int fb_fd, kbd_fd, mouse_fd;
+  int fb_fd, kbd_fd, mouse_fd, notify_fd;
   void *p;
   window_t *w;
 
@@ -120,10 +127,23 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
     mouse_fd = open("/dev/input/event1", O_RDONLY);
     if (mouse_fd == -1) debug_errno("BEEPY", "open mouse");
 
+    notify_fd = inotify_init1(IN_NONBLOCK);
+    if (notify_fd == -1) debug_errno("BEEPY", "open file notify");
+
     if (fb_fd != -1 && kbd_fd != -1 && mouse_fd != -1) {
       debug(DEBUG_INFO, "BEEPY", "framebuffer fb1 open as fd %d", fb_fd);
       debug(DEBUG_INFO, "BEEPY", "keyboard event0 open as fd %d", kbd_fd);
       debug(DEBUG_INFO, "BEEPY", "mouse event1 open as fd %d", mouse_fd);
+      debug(DEBUG_INFO, "BEEPY", "file notify open as fd %d", notify_fd);
+
+      if (notify_fd != -1 && beepy_state.app_install_path[0] != 0) {
+        int wd = inotify_add_watch(notify_fd, beepy_state.app_install_path, IN_CREATE);
+        if (wd == -1) {
+          debug(DEBUG_ERROR, "BEEPY", "Unable to notify for changes in '%s'", beepy_state.app_install_path);
+          close(notify_fd);
+          notify_fd = 0;
+        }
+      }
 
       if (ioctl(fb_fd, FBIOGET_FSCREENINFO, &finfo) != -1 &&
           ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo) != -1) {
@@ -133,6 +153,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           display->fb_fd = fb_fd;
           display->kbd_fd = kbd_fd;
           display->mouse_fd = mouse_fd;
+          display->notify_fd = notify_fd;
           display->p = p;
           display->offscreen = xmalloc(finfo.smem_len);
           display->width = vinfo.xres;
@@ -153,11 +174,13 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
         close(fb_fd);
         close(kbd_fd);
         close(mouse_fd);
+        if (notify_fd != -1) close(notify_fd);
       }
     } else {
       if (fb_fd != -1) close(fb_fd);
       if (kbd_fd != -1) close(kbd_fd);
       if (mouse_fd != -1) close(mouse_fd);
+      if (notify_fd != -1) close(notify_fd);
     }
   } else {
     debug(DEBUG_ERROR, "BEEPY", "only one window can be created");
@@ -180,6 +203,9 @@ static int window_destroy(window_t *window) {
     }
     if (display->mouse_fd > 0) {
       close(display->mouse_fd);
+    }
+    if (display->notify_fd > 0) {
+      close(display->notify_fd);
     }
     if (display->offscreen) xfree(display->offscreen);
 
@@ -452,7 +478,8 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
     FD_ZERO(&fds);
     FD_SET(display->kbd_fd, &fds);
     FD_SET(display->mouse_fd, &fds);
-    nfds = display->kbd_fd > display->mouse_fd ? display->kbd_fd : display->mouse_fd;
+    if (display->notify_fd > 0) FD_SET(display->notify_fd, &fds);
+    nfds = MAX(display->kbd_fd, MAX(display->mouse_fd, display->notify_fd));
     tv.tv_sec = 0;
     tv.tv_usec = wait;
 
@@ -468,9 +495,24 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
       default:
         nread = 0;
         if (FD_ISSET(display->kbd_fd, &fds)) {
-          sys_read_timeout(display->kbd_fd, &event, sizeof(event), &nread, 0);
+          sys_read_timeout(display->kbd_fd, (uint8_t *)&event, sizeof(event), &nread, 0);
+        } else if (FD_ISSET(display->mouse_fd, &fds)) {
+          sys_read_timeout(display->mouse_fd, (uint8_t *)&event, sizeof(event), &nread, 0);
         } else {
-          sys_read_timeout(display->mouse_fd, &event, sizeof(event),  &nread, 0);
+          char buf[4096];
+          nread = read(display->notify_fd, buf, sizeof(buf));
+          if (nread <= 0) break;
+          const struct inotify_event *notify_event;
+          for (char *ptr = buf; ptr < buf + nread; ptr += sizeof(struct inotify_event) + notify_event->len) {
+            notify_event = (const struct inotify_event *)ptr;
+            debug(DEBUG_INFO, "BEEPY", "Installing %s", notify_event->name);
+          }
+          debug(DEBUG_TRACE, "BEEPY", "send MSG_DEPLOY");
+          client_request_t creq;
+          xmemset(&creq, 0, sizeof(client_request_t));
+          creq.type = MSG_DEPLOY;
+          thread_client_write(pumpkin_get_spawner(), (uint8_t *)&creq, sizeof(client_request_t));
+          break;
         }
         debug(DEBUG_TRACE, "BEEPY", "read %d bytes", nread);
 
@@ -574,7 +616,7 @@ static int monitor_action(void *arg) {
 
   for (; !thread_must_end();) {
     if (count == 0) {
-      if (read_sysfs("/sys/firmware/beepy/battery_percent", buffer, 12) == 0) {
+      if (read_sysfs("/sys/firmware/beepy/battery_percent", (uint8_t *)buffer, 12) == 0) {
         battery = sys_atoi(buffer);
         pumpkin_set_battery(battery);
         debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
@@ -591,8 +633,13 @@ static int monitor_action(void *arg) {
 
 static int libbeepy_start(int pe) {
   int r = 0;
+  char *vfs_root = NULL;
 
-  debug(DEBUG_INFO, "BEEPY", "start");
+  if (script_get_string(pe, 0, &vfs_root) == 0) {
+    sys_sprintf(beepy_state.app_install_path, "%sapp_install", vfs_root);
+  }
+
+  debug(DEBUG_INFO, "BEEPY", "start: '%s'", beepy_state.app_install_path);
   if ((beepy_state.battery_thread_handle = thread_begin(TAG_BATTERY_MONITOR, monitor_action, NULL)) == -1) {
     debug(DEBUG_ERROR, "BEEPY", "Failed to start battery monitor thread");
     r = -1;

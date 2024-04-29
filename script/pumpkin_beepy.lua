@@ -17,9 +17,11 @@ if not wp then
   return
 end
 
-wp.start()
+localVFS = "./vfs/"
 
-pit.mount("./vfs/", "/")
+wp.start(localVFS)
+
+pit.mount(localVFS, "/")
 
 pumpkin = pit.loadlib("libos")
 pumpkin.init(1)
