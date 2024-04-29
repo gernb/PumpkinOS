@@ -4,6 +4,7 @@
 #include <fcntl.h>
 #include <linux/fb.h>
 #include <linux/input-event-codes.h>
+#include <linux/input.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/select.h>
@@ -114,6 +115,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
 
     kbd_fd = open("/dev/input/event0", O_RDONLY);
     if (kbd_fd == -1) debug_errno("BEEPY", "open keyboard");
+    ioctl(kbd_fd, EVIOCGRAB, 1);
 
     mouse_fd = open("/dev/input/event1", O_RDONLY);
     if (mouse_fd == -1) debug_errno("BEEPY", "open mouse");
@@ -432,12 +434,10 @@ static int map_keycode(uint16_t code, display_t *d) {
 
 static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   display_t *display = (display_t *)window;
-  uint8_t buf[32];
-  uint32_t value;
-  uint16_t type, code;
+  struct input_event event;
   struct timeval tv;
   fd_set fds;
-  int i, nfds, len, nread, ev = -1;
+  int nfds, nread, ev = -1;
 
   if (display->stored_event.ev != 0) {
     ev = display->stored_event.ev;
@@ -470,27 +470,23 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
       default:
         nread = 0;
         if (FD_ISSET(display->kbd_fd, &fds)) {
-          sys_read_timeout(display->kbd_fd, buf, len, &nread, 0);
+          sys_read_timeout(display->kbd_fd, &event, sizeof(event), &nread, 0);
         } else {
-          sys_read_timeout(display->mouse_fd, buf, len, &nread, 0);
+          sys_read_timeout(display->mouse_fd, &event, sizeof(event),  &nread, 0);
         }
         debug(DEBUG_TRACE, "BEEPY", "read %d bytes", nread);
 
-        if (nread == len) {
-          i = len - 8; // ignore struct timeval
-          i += get2l(&type, buf, i);
-          i += get2l(&code, buf, i);
-          i += get4l(&value, buf, i);
-          debug(DEBUG_TRACE, "BEEPY", "type %u code %u value %u", type, code, value);
+        if (nread == sizeof(event)) {
+          debug(DEBUG_TRACE, "BEEPY", "type %u code %u value %u", event.type, event.code, event.value);
 
           // types and codes defined in /usr/include/linux/input-event-codes.h
-          switch (type) {
+          switch (event.type) {
             case EV_KEY:
-              debug(DEBUG_TRACE, "BEEPY", "EV_KEY 0x%04X down=%d", code, value);
-              switch (code) {
+              debug(DEBUG_TRACE, "BEEPY", "EV_KEY 0x%04X down=%d", event.code, event.value);
+              switch (event.code) {
                 case BTN_MOUSE: // BTN_LEFT (for mouse)
                   // Buttom event requires 2 events: a move and then button up/down <- Is this true?
-                  display->stored_event.ev = (value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
+                  display->stored_event.ev = (event.value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
                   display->stored_event.arg1 = 1;
                   display->stored_event.arg2 = 0;
                   ev = WINDOW_MOTION;
@@ -498,46 +494,46 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
                   *arg2 = display->y;
                   break;
                 case KEY_LEFTSHIFT:
-                  debug(DEBUG_TRACE, "BEEPY", "SHIFT key: %d", value);
-                  display->key_shift = value;
-                  ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
+                  debug(DEBUG_TRACE, "BEEPY", "SHIFT key: %d", event.value);
+                  display->key_shift = event.value;
+                  ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_SHIFT;
                   *arg2 = 0;
                   break;
                 case KEY_LEFTCTRL:
-                  debug(DEBUG_TRACE, "BEEPY", "CTRL key: %d", value);
-                  display->key_ctrl = value;
-                  ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
+                  debug(DEBUG_TRACE, "BEEPY", "CTRL key: %d", event.value);
+                  display->key_ctrl = event.value;
+                  ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_CTRL;
                   *arg2 = 0;
                   break;
                 case KEY_RIGHTALT:
-                  debug(DEBUG_TRACE, "BEEPY", "SYM key: %d", value);
-                  display->key_sym = value;
-                  ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
+                  debug(DEBUG_TRACE, "BEEPY", "SYM key: %d", event.value);
+                  display->key_sym = event.value;
+                  ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_RALT;
                   *arg2 = 0;
                   break;
                 default:
-                  ev = (value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
-                  *arg1 = map_keycode(code, display);
+                  ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
+                  *arg1 = map_keycode(event.code, display);
                   *arg2 = 0;
               }
               break;
 
             case EV_REL:
-              if (code == REL_X) {
+              if (event.code == REL_X) {
                 int prev = display->x;
-                display->x += value;
+                display->x += event.value;
                 if (display->x < 0) display->x = 0;
                 else if (display->x >= display->width) display->x = display->width - 1;
-                debug(DEBUG_TRACE, "BEEPY", "EV_REL X %d: %d -> %d", value, prev, display->x);
-              } else if (code == REL_Y) {
+                debug(DEBUG_TRACE, "BEEPY", "EV_REL X %d: %d -> %d", event.value, prev, display->x);
+              } else if (event.code == REL_Y) {
                 int prev = display->y;
-                display->y += value;
+                display->y += event.value;
                 if (display->y < 0) display->y = 0;
                 else if (display->y >= display->height) display->y = display->height - 1;
-                debug(DEBUG_TRACE, "BEEPY", "EV_REL Y %d: %d -> %d", value, prev, display->y);
+                debug(DEBUG_TRACE, "BEEPY", "EV_REL Y %d: %d -> %d", event.value, prev, display->y);
               }
               render_to_display(display);
               ev = WINDOW_MOTION;
