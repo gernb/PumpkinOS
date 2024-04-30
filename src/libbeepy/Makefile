@@ -1,4 +1,5 @@
 include ../common.mak
+include ../commonp.mak
 
 PROGRAM=$(BIN)/libbeepy$(SOEXT)
 

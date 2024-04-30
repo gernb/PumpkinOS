@@ -8,6 +8,8 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/select.h>
+#include <sys/inotify.h>
+#include <sys/param.h>
 
 #include "sys.h"
 #include "script.h"
@@ -17,18 +19,17 @@
 #include "xalloc.h"
 #include "thread.h"
 
-typedef struct {
-  int ev, arg1, arg2;
-} stored_event_t;
+#include <PalmOS.h>
+#include "pumpkin.h"
 
 typedef struct {
   int width, height, depth, pitch;
-  int fb_fd, kbd_fd, mouse_fd, len;
+  int fb_fd, kbd_fd, mouse_fd, notify_fd, len;
   int x, y;
   uint32_t *offscreen;
   void *p;
-  stored_event_t stored_event;
   int key_shift, key_ctrl, key_sym;
+  int key_is_down, clear_shift, clear_ctrl, clear_sym;
 } display_t;
 
 struct texture_t {
@@ -37,10 +38,12 @@ struct texture_t {
 };
 
 #define TAG_BATTERY_MONITOR  "battery_monitor"
+#define MAX_PATH 256
 
 typedef struct {
   int window_count;
   int battery_thread_handle;
+  char app_install_path[MAX_PATH];
 } beepy_state_t;
 
 static window_provider_t wp;
@@ -105,7 +108,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
   display_t *display = xmalloc(sizeof(display_t));
   struct fb_var_screeninfo vinfo;
   struct fb_fix_screeninfo finfo;
-  int fb_fd, kbd_fd, mouse_fd;
+  int fb_fd, kbd_fd, mouse_fd, notify_fd;
   void *p;
   window_t *w;
 
@@ -120,10 +123,23 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
     mouse_fd = open("/dev/input/event1", O_RDONLY);
     if (mouse_fd == -1) debug_errno("BEEPY", "open mouse");
 
+    notify_fd = inotify_init1(IN_NONBLOCK);
+    if (notify_fd == -1) debug_errno("BEEPY", "open file notify");
+
     if (fb_fd != -1 && kbd_fd != -1 && mouse_fd != -1) {
       debug(DEBUG_INFO, "BEEPY", "framebuffer fb1 open as fd %d", fb_fd);
       debug(DEBUG_INFO, "BEEPY", "keyboard event0 open as fd %d", kbd_fd);
       debug(DEBUG_INFO, "BEEPY", "mouse event1 open as fd %d", mouse_fd);
+      debug(DEBUG_INFO, "BEEPY", "file notify open as fd %d", notify_fd);
+
+      if (notify_fd != -1 && beepy_state.app_install_path[0] != 0) {
+        int wd = inotify_add_watch(notify_fd, beepy_state.app_install_path, IN_CREATE);
+        if (wd == -1) {
+          debug(DEBUG_ERROR, "BEEPY", "Unable to notify for changes in '%s'", beepy_state.app_install_path);
+          close(notify_fd);
+          notify_fd = 0;
+        }
+      }
 
       if (ioctl(fb_fd, FBIOGET_FSCREENINFO, &finfo) != -1 &&
           ioctl(fb_fd, FBIOGET_VSCREENINFO, &vinfo) != -1) {
@@ -133,6 +149,7 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           display->fb_fd = fb_fd;
           display->kbd_fd = kbd_fd;
           display->mouse_fd = mouse_fd;
+          display->notify_fd = notify_fd;
           display->p = p;
           display->offscreen = xmalloc(finfo.smem_len);
           display->width = vinfo.xres;
@@ -142,7 +159,6 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           display->depth = vinfo.bits_per_pixel;
           display->pitch = finfo.line_length;
           display->len = finfo.smem_len;
-          display->stored_event.ev = 0;
           *width = display->width;
           *height = display->height;
           w = (window_t *)display;
@@ -153,11 +169,13 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
         close(fb_fd);
         close(kbd_fd);
         close(mouse_fd);
+        if (notify_fd != -1) close(notify_fd);
       }
     } else {
       if (fb_fd != -1) close(fb_fd);
       if (kbd_fd != -1) close(kbd_fd);
       if (mouse_fd != -1) close(mouse_fd);
+      if (notify_fd != -1) close(notify_fd);
     }
   } else {
     debug(DEBUG_ERROR, "BEEPY", "only one window can be created");
@@ -180,6 +198,9 @@ static int window_destroy(window_t *window) {
     }
     if (display->mouse_fd > 0) {
       close(display->mouse_fd);
+    }
+    if (display->notify_fd > 0) {
+      close(display->notify_fd);
     }
     if (display->offscreen) xfree(display->offscreen);
 
@@ -301,6 +322,7 @@ static int window_draw_texture(window_t *window, texture_t *texture, int x, int 
 
 static int map_keycode(uint16_t code, display_t *d) {
   int key = 0;
+  debug(DEBUG_TRACE, "BEEPY", "CTRL: %d, SHIFT: %d, SYM: %d, code: %d", d->key_ctrl, d->key_shift, d->key_sym, code);
   if (d->key_ctrl) {
     switch (code) {
       case KEY_CONFIG: key = WINDOW_KEY_HOME; break;
@@ -335,7 +357,37 @@ static int map_keycode(uint16_t code, display_t *d) {
       case KEY_M: key = 13; break;
     }
   } else if (d->key_sym) {
+    switch (code) {
+      case 16: key = '~'; break;
+      case 17: key = '`'; break;
+      case 18: key = '{'; break;
+      case 19: key = '}'; break;
+      case 20: key = '['; break;
+      case 21: key = ']'; break;
+      case 22: key = '<'; break;
+      case 23: key = '>'; break;
+      case 24: key = '^'; break;
+      case 25: key = '%'; break;
 
+      case 30: key = '='; break;
+      case 31: key = 246; break; // division sign
+      case 32: key = 241; break; // plus/minus
+      case 33: key = 249; break; // period centered
+      case 34: key = '\\'; break;
+      case 35: key = '|'; break;
+      case 36: key = '&'; break;
+      case 37: key = '"'; break;
+      case 38: key = '"'; break;
+
+      case 44: key = 157; break; // yen
+      case 45: key = 238; break; // euro
+      case 46: key = 156; break; // sterling
+      case 47: key = 168; break; // upside down question
+      case 48: key = 173; break; // upside down exclamation
+      case 49: key = 174; break;
+      case 50: key = 175; break;
+      case 113: key = '$'; break;
+    }
   } else {
     switch (code) {
       case KEY_1: key = '1'; break;
@@ -439,20 +491,12 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   fd_set fds;
   int nfds, nread, ev = -1;
 
-  if (display->stored_event.ev != 0) {
-    ev = display->stored_event.ev;
-    *arg1 = display->stored_event.arg1;
-    *arg2 = display->stored_event.arg2;
-    display->stored_event.ev = 0;
-    debug(DEBUG_TRACE, "BEEPY", "window_event2 stored event: %d arg1=%d arg2=%d", ev, *arg1, *arg2);
-    return ev;
-  }
-
   for (; ev == -1;) {
     FD_ZERO(&fds);
     FD_SET(display->kbd_fd, &fds);
     FD_SET(display->mouse_fd, &fds);
-    nfds = display->kbd_fd > display->mouse_fd ? display->kbd_fd : display->mouse_fd;
+    if (display->notify_fd > 0) FD_SET(display->notify_fd, &fds);
+    nfds = MAX(display->kbd_fd, MAX(display->mouse_fd, display->notify_fd));
     tv.tv_sec = 0;
     tv.tv_usec = wait;
 
@@ -468,9 +512,24 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
       default:
         nread = 0;
         if (FD_ISSET(display->kbd_fd, &fds)) {
-          sys_read_timeout(display->kbd_fd, &event, sizeof(event), &nread, 0);
+          sys_read_timeout(display->kbd_fd, (uint8_t *)&event, sizeof(event), &nread, 0);
+        } else if (FD_ISSET(display->mouse_fd, &fds)) {
+          sys_read_timeout(display->mouse_fd, (uint8_t *)&event, sizeof(event), &nread, 0);
         } else {
-          sys_read_timeout(display->mouse_fd, &event, sizeof(event),  &nread, 0);
+          char buf[4096];
+          nread = read(display->notify_fd, buf, sizeof(buf));
+          if (nread <= 0) break;
+          const struct inotify_event *notify_event;
+          for (char *ptr = buf; ptr < buf + nread; ptr += sizeof(struct inotify_event) + notify_event->len) {
+            notify_event = (const struct inotify_event *)ptr;
+            debug(DEBUG_INFO, "BEEPY", "Installing %s", notify_event->name);
+          }
+          debug(DEBUG_TRACE, "BEEPY", "send MSG_DEPLOY");
+          client_request_t creq;
+          xmemset(&creq, 0, sizeof(client_request_t));
+          creq.type = MSG_DEPLOY;
+          thread_client_write(pumpkin_get_spawner(), (uint8_t *)&creq, sizeof(client_request_t));
+          break;
         }
         debug(DEBUG_TRACE, "BEEPY", "read %d bytes", nread);
 
@@ -483,31 +542,45 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
               debug(DEBUG_TRACE, "BEEPY", "EV_KEY 0x%04X down=%d", event.code, event.value);
               switch (event.code) {
                 case BTN_MOUSE: // BTN_LEFT (for mouse)
-                  // Buttom event requires 2 events: a move and then button up/down <- Is this true?
-                  display->stored_event.ev = (event.value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
-                  display->stored_event.arg1 = 1;
-                  display->stored_event.arg2 = 0;
-                  ev = WINDOW_MOTION;
-                  *arg1 = display->x;
-                  *arg2 = display->y;
+                  ev = (event.value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
+                  *arg1 = 1;
+                  *arg2 = 0;
                   break;
                 case KEY_LEFTSHIFT:
                   debug(DEBUG_TRACE, "BEEPY", "SHIFT key: %d", event.value);
-                  display->key_shift = event.value;
+                  if (event.value == 1) {
+                    display->key_shift = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_shift = 1;
+                  } else {
+                    display->key_shift = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_SHIFT;
                   *arg2 = 0;
                   break;
                 case KEY_LEFTCTRL:
                   debug(DEBUG_TRACE, "BEEPY", "CTRL key: %d", event.value);
-                  display->key_ctrl = event.value;
+                  if (event.value == 1) {
+                    display->key_ctrl = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_ctrl = 1;
+                  } else {
+                    display->key_ctrl = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_CTRL;
                   *arg2 = 0;
                   break;
                 case KEY_RIGHTALT:
                   debug(DEBUG_TRACE, "BEEPY", "SYM key: %d", event.value);
-                  display->key_sym = event.value;
+                  if (event.value == 1) {
+                    display->key_sym = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_sym = 1;
+                  } else {
+                    display->key_sym = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_RALT;
                   *arg2 = 0;
@@ -516,6 +589,19 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = map_keycode(event.code, display);
                   *arg2 = 0;
+                  display->key_is_down = event.value;
+                  if (display->clear_shift && display->key_is_down == 0) {
+                    display->key_shift = 0;
+                    display->clear_shift = 0;
+                  }
+                  if (display->clear_ctrl && display->key_is_down == 0) {
+                    display->key_ctrl = 0;
+                    display->clear_ctrl = 0;
+                  }
+                  if (display->clear_sym && display->key_is_down == 0) {
+                    display->key_sym = 0;
+                    display->clear_sym = 0;
+                  }
               }
               break;
 
@@ -565,22 +651,30 @@ static int read_sysfs(char *path, uint8_t *buffer, int len) {
   return 0;
 }
 
-static int monitor_action(void *arg) {
+static int battery_level() {
   char buffer[12];
   int battery;
+
+  if (read_sysfs("/sys/firmware/beepy/battery_percent", (uint8_t *)buffer, 12) == 0) {
+    battery = sys_atoi(buffer);
+    pumpkin_set_battery(battery);
+    debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
+  } else {
+    battery = 100;
+    debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
+  }
+
+  return battery;
+}
+
+static int monitor_action(void *arg) {
   int count = 0;
   const int sleep_time = 500000; // 0.5 seconds
   const int check_secs = 3 * 1000000 / sleep_time; // every 3 seconds
 
   for (; !thread_must_end();) {
     if (count == 0) {
-      if (read_sysfs("/sys/firmware/beepy/battery_percent", buffer, 12) == 0) {
-        battery = sys_atoi(buffer);
-        pumpkin_set_battery(battery);
-        debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
-      } else {
-        debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
-      }
+      battery_level();
     }
     count = (count + 1) % check_secs;
     sys_usleep(sleep_time);
@@ -591,14 +685,23 @@ static int monitor_action(void *arg) {
 
 static int libbeepy_start(int pe) {
   int r = 0;
+  char *vfs_root = NULL;
 
-  debug(DEBUG_INFO, "BEEPY", "start");
+  if (script_get_string(pe, 0, &vfs_root) == 0) {
+    sys_sprintf(beepy_state.app_install_path, "%sapp_install", vfs_root);
+  }
+
+  debug(DEBUG_INFO, "BEEPY", "start: '%s'", beepy_state.app_install_path);
   if ((beepy_state.battery_thread_handle = thread_begin(TAG_BATTERY_MONITOR, monitor_action, NULL)) == -1) {
     debug(DEBUG_ERROR, "BEEPY", "Failed to start battery monitor thread");
     r = -1;
   }
 
   return r;
+}
+
+static int libbeepy_get_battery(int pe) {
+  return script_push_integer(pe, battery_level());
 }
 
 static int libbeepy_finish(int pe) {
@@ -632,6 +735,7 @@ int libbeepy_init(int pe, script_ref_t obj) {
   script_set_pointer(pe, WINDOW_PROVIDER, &wp);
 
   script_add_function(pe, obj, "start", libbeepy_start);
+  script_add_function(pe, obj, "battery_level", libbeepy_get_battery);
   script_add_function(pe, obj, "finish", libbeepy_finish);
 
   return 0;

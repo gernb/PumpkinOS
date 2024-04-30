@@ -521,7 +521,7 @@ static void pumpkin_unload_fonts(void) {
   }
 }
 
-int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_provider_t *ap, bt_provider_t *bt, gps_parse_line_f gps_parse_line, uint16_t density) {
+int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_provider_t *ap, bt_provider_t *bt, gps_parse_line_f gps_parse_line, uint16_t density, int battery) {
   int fd;
 #if defined(DARWIN) || defined(BEEPY)
   vfs_session_t *vfs_session;
@@ -573,7 +573,7 @@ int pumpkin_global_init(script_engine_t *engine, window_provider_t *wp, audio_pr
   pumpkin_module.current_task = -1;
   pumpkin_module.dragging = -1;
   pumpkin_module.nextTaskId = 1;
-  pumpkin_module.battery = 100;
+  pumpkin_module.battery = battery;
   pumpkin_module.density = density;
 
   StoRemoveLocks(APP_STORAGE);
