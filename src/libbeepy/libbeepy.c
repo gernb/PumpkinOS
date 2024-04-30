@@ -23,17 +23,13 @@
 #include "pumpkin.h"
 
 typedef struct {
-  int ev, arg1, arg2;
-} stored_event_t;
-
-typedef struct {
   int width, height, depth, pitch;
   int fb_fd, kbd_fd, mouse_fd, notify_fd, len;
   int x, y;
   uint32_t *offscreen;
   void *p;
-  stored_event_t stored_event;
   int key_shift, key_ctrl, key_sym;
+  int key_is_down, clear_shift, clear_ctrl, clear_sym;
 } display_t;
 
 struct texture_t {
@@ -163,7 +159,6 @@ static window_t *window_create(int encoding, int *width, int *height, int xfacto
           display->depth = vinfo.bits_per_pixel;
           display->pitch = finfo.line_length;
           display->len = finfo.smem_len;
-          display->stored_event.ev = 0;
           *width = display->width;
           *height = display->height;
           w = (window_t *)display;
@@ -327,6 +322,7 @@ static int window_draw_texture(window_t *window, texture_t *texture, int x, int 
 
 static int map_keycode(uint16_t code, display_t *d) {
   int key = 0;
+  debug(DEBUG_TRACE, "BEEPY", "CTRL: %d, SHIFT: %d, SYM: %d, code: %d", d->key_ctrl, d->key_shift, d->key_sym, code);
   if (d->key_ctrl) {
     switch (code) {
       case KEY_CONFIG: key = WINDOW_KEY_HOME; break;
@@ -361,7 +357,37 @@ static int map_keycode(uint16_t code, display_t *d) {
       case KEY_M: key = 13; break;
     }
   } else if (d->key_sym) {
+    switch (code) {
+      case 16: key = '~'; break;
+      case 17: key = '`'; break;
+      case 18: key = '{'; break;
+      case 19: key = '}'; break;
+      case 20: key = '['; break;
+      case 21: key = ']'; break;
+      case 22: key = '<'; break;
+      case 23: key = '>'; break;
+      case 24: key = '^'; break;
+      case 25: key = '%'; break;
 
+      case 30: key = '='; break;
+      case 31: key = 246; break; // division sign
+      case 32: key = 241; break; // plus/minus
+      case 33: key = 249; break; // period centered
+      case 34: key = '\\'; break;
+      case 35: key = '|'; break;
+      case 36: key = '&'; break;
+      case 37: key = '"'; break;
+      case 38: key = '"'; break;
+
+      case 44: key = 157; break; // yen
+      case 45: key = 238; break; // euro
+      case 46: key = 156; break; // sterling
+      case 47: key = 168; break; // upside down question
+      case 48: key = 173; break; // upside down exclamation
+      case 49: key = 174; break;
+      case 50: key = 175; break;
+      case 113: key = '$'; break;
+    }
   } else {
     switch (code) {
       case KEY_1: key = '1'; break;
@@ -465,15 +491,6 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
   fd_set fds;
   int nfds, nread, ev = -1;
 
-  if (display->stored_event.ev != 0) {
-    ev = display->stored_event.ev;
-    *arg1 = display->stored_event.arg1;
-    *arg2 = display->stored_event.arg2;
-    display->stored_event.ev = 0;
-    debug(DEBUG_TRACE, "BEEPY", "window_event2 stored event: %d arg1=%d arg2=%d", ev, *arg1, *arg2);
-    return ev;
-  }
-
   for (; ev == -1;) {
     FD_ZERO(&fds);
     FD_SET(display->kbd_fd, &fds);
@@ -525,31 +542,45 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
               debug(DEBUG_TRACE, "BEEPY", "EV_KEY 0x%04X down=%d", event.code, event.value);
               switch (event.code) {
                 case BTN_MOUSE: // BTN_LEFT (for mouse)
-                  // Buttom event requires 2 events: a move and then button up/down <- Is this true?
-                  display->stored_event.ev = (event.value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
-                  display->stored_event.arg1 = 1;
-                  display->stored_event.arg2 = 0;
-                  ev = WINDOW_MOTION;
-                  *arg1 = display->x;
-                  *arg2 = display->y;
+                  ev = (event.value == 1) ? WINDOW_BUTTONDOWN : WINDOW_BUTTONUP;
+                  *arg1 = 1;
+                  *arg2 = 0;
                   break;
                 case KEY_LEFTSHIFT:
                   debug(DEBUG_TRACE, "BEEPY", "SHIFT key: %d", event.value);
-                  display->key_shift = event.value;
+                  if (event.value == 1) {
+                    display->key_shift = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_shift = 1;
+                  } else {
+                    display->key_shift = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_SHIFT;
                   *arg2 = 0;
                   break;
                 case KEY_LEFTCTRL:
                   debug(DEBUG_TRACE, "BEEPY", "CTRL key: %d", event.value);
-                  display->key_ctrl = event.value;
+                  if (event.value == 1) {
+                    display->key_ctrl = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_ctrl = 1;
+                  } else {
+                    display->key_ctrl = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_CTRL;
                   *arg2 = 0;
                   break;
                 case KEY_RIGHTALT:
                   debug(DEBUG_TRACE, "BEEPY", "SYM key: %d", event.value);
-                  display->key_sym = event.value;
+                  if (event.value == 1) {
+                    display->key_sym = 1;
+                  } else if (display->key_is_down) {
+                    display->clear_sym = 1;
+                  } else {
+                    display->key_sym = 0;
+                  }
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = WINDOW_KEY_RALT;
                   *arg2 = 0;
@@ -558,6 +589,19 @@ static int window_event2(window_t *window, int wait, int *arg1, int *arg2) {
                   ev = (event.value == 1) ? WINDOW_KEYDOWN : WINDOW_KEYUP;
                   *arg1 = map_keycode(event.code, display);
                   *arg2 = 0;
+                  display->key_is_down = event.value;
+                  if (display->clear_shift && display->key_is_down == 0) {
+                    display->key_shift = 0;
+                    display->clear_shift = 0;
+                  }
+                  if (display->clear_ctrl && display->key_is_down == 0) {
+                    display->key_ctrl = 0;
+                    display->clear_ctrl = 0;
+                  }
+                  if (display->clear_sym && display->key_is_down == 0) {
+                    display->key_sym = 0;
+                    display->clear_sym = 0;
+                  }
               }
               break;
 

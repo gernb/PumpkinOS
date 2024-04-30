@@ -22,8 +22,6 @@ echo always | sudo tee /sys/module/beepy_kbd/parameters/touch_act &>/dev/null
 echo mouse | sudo tee /sys/module/beepy_kbd/parameters/touch_as &>/dev/null
 echo 0 | sudo tee /sys/class/vtconsole/vtcon1/bind &>/dev/null
 
-PATH=./bin:$PATH
-
 # Execute the command
 LD_LIBRARY_PATH=./bin ./pumpkin -d 1 ${@} -s libscriptlua.so ./script/pumpkin_beepy.lua
 
