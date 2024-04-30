@@ -209,11 +209,14 @@ static int libos_app_init(int pe) {
   audio_provider_t *ap;
   bt_provider_t *bt;
   gps_parse_line_f gps_parse_line;
-  script_int_t density_param;
+  script_int_t density_param, battery_param;
   uint16_t density = kDensityDouble;
 
   if (script_get_integer(pe, 0, &density_param) == 0) {
     density = density_param == 1 ? kDensityLow : kDensityDouble;
+  }
+  if (script_get_integer(pe, 1, &battery_param) != 0) {
+    battery_param = 100;
   }
 
   wp = script_get_pointer(pe, WINDOW_PROVIDER);
@@ -221,7 +224,7 @@ static int libos_app_init(int pe) {
   bt = script_get_pointer(pe, BT_PROVIDER);
   gps_parse_line = script_get_pointer(pe, GPS_PARSE_LINE_PROVIDER);
 
-  return script_push_boolean(pe, pumpkin_global_init(script_get_engine(pe), wp, ap, bt, gps_parse_line, density) == 0);
+  return script_push_boolean(pe, pumpkin_global_init(script_get_engine(pe), wp, ap, bt, gps_parse_line, density, battery_param) == 0);
 }
 
 static int libos_app_finish(int pe) {

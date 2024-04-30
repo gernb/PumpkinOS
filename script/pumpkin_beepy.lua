@@ -20,9 +20,10 @@ end
 localVFS = "./vfs/"
 
 wp.start(localVFS)
+battery = wp.battery_level()
 
 pit.mount(localVFS, "/")
 
 pumpkin = pit.loadlib("libos")
-pumpkin.init(1)
+pumpkin.init(1, battery)
 pumpkin.start(400, 240, 32, false, false, false, "Launcher")

@@ -651,22 +651,30 @@ static int read_sysfs(char *path, uint8_t *buffer, int len) {
   return 0;
 }
 
-static int monitor_action(void *arg) {
+static int battery_level() {
   char buffer[12];
   int battery;
+
+  if (read_sysfs("/sys/firmware/beepy/battery_percent", (uint8_t *)buffer, 12) == 0) {
+    battery = sys_atoi(buffer);
+    pumpkin_set_battery(battery);
+    debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
+  } else {
+    battery = 100;
+    debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
+  }
+
+  return battery;
+}
+
+static int monitor_action(void *arg) {
   int count = 0;
   const int sleep_time = 500000; // 0.5 seconds
   const int check_secs = 3 * 1000000 / sleep_time; // every 3 seconds
 
   for (; !thread_must_end();) {
     if (count == 0) {
-      if (read_sysfs("/sys/firmware/beepy/battery_percent", (uint8_t *)buffer, 12) == 0) {
-        battery = sys_atoi(buffer);
-        pumpkin_set_battery(battery);
-        debug(DEBUG_TRACE, "BEEPY", "set current battery: %d", battery);
-      } else {
-        debug(DEBUG_ERROR, "BEEPY", "unable to read battery level");
-      }
+      battery_level();
     }
     count = (count + 1) % check_secs;
     sys_usleep(sleep_time);
@@ -690,6 +698,10 @@ static int libbeepy_start(int pe) {
   }
 
   return r;
+}
+
+static int libbeepy_get_battery(int pe) {
+  return script_push_integer(pe, battery_level());
 }
 
 static int libbeepy_finish(int pe) {
@@ -723,6 +735,7 @@ int libbeepy_init(int pe, script_ref_t obj) {
   script_set_pointer(pe, WINDOW_PROVIDER, &wp);
 
   script_add_function(pe, obj, "start", libbeepy_start);
+  script_add_function(pe, obj, "battery_level", libbeepy_get_battery);
   script_add_function(pe, obj, "finish", libbeepy_finish);
 
   return 0;

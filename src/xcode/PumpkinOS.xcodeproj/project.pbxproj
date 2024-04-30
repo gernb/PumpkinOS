@@ -552,7 +552,7 @@
 		442E5C912BCDEC7400E4445D /* libscriptlua.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libscriptlua.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		442E5C972BCE06D900E4445D /* libos.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libos.so; sourceTree = BUILT_PRODUCTS_DIR; };
 		442E5C9B2BCE114B00E4445D /* Pit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Pit.swift; sourceTree = "<group>"; };
-		4446DC8D2BDC0C36002FFB0D /* libbeepy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libbeepy.c; sourceTree = "<group>"; };
+		4446DC8D2BDC0C36002FFB0D /* libbeepy.c */ = {isa = PBXFileReference; indentWidth = 2; lastKnownFileType = sourcecode.c.c; path = libbeepy.c; sourceTree = "<group>"; tabWidth = 2; };
 		4446DC8E2BDC0C36002FFB0D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		4446DC902BDC0C3F002FFB0D /* libfb.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = libfb.c; sourceTree = "<group>"; };
 		4446DC912BDC0C3F002FFB0D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
