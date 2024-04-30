@@ -106,14 +106,6 @@ struct command_internal_data_t {
   command_prefs_t prefs;
 };
 
-#if defined(BEEPY) || defined(DARWIN)
-#define DEFAULT_FONT      font16x16Id
-#define DEFAULT_FONT_SEL  sel16x16
-#else
-#define DEFAULT_FONT      font8x14Id
-#define DEFAULT_FONT_SEL  sel8x14
-#endif
-
 static const RGBColorType defaultForeground = { 0, 0xFF, 0xFF, 0xFF };
 static const RGBColorType defaultBackground = { 0, 0x13, 0x32, 0x65 };
 static const RGBColorType defaultHighlight  = { 0, 0xFF, 0xFF, 0x80 };
@@ -855,23 +847,35 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
   FormType *formP;
   ControlType *ctl;
   FontID old;
-  UInt32 color;
+  UInt32 color, density;
   UInt16 index, sel, width, height;
   Boolean handled = false;
+
+  WinScreenGetAttribute(winScreenDensity, &density);
 
   switch (event->eType) {
     case frmOpenEvent:
       formP = FrmGetActiveForm();
-      switch (idata->prefs.font) {
-        case font6x10Id:  sel = sel6x10;  break;
-        case font8x14Id:  sel = sel8x14;  break;
-        case font8x16Id:  sel = sel8x16;  break;
-        case font16x16Id: sel = sel16x16; break;
-        default: sel = DEFAULT_FONT_SEL; break;
+      if (density == kDensityDouble) {
+        switch (idata->prefs.font) {
+          case font6x10Id:  sel = sel6x10;  break;
+          case font8x14Id:  sel = sel8x14;  break;
+          case font8x16Id:  sel = sel8x16;  break;
+          default: sel = sel8x14; break;
+        }
+        index = FrmGetObjectIndex(formP, sel);
+        ctl = (ControlType *)FrmGetObjectPtr(formP, index);
+        CtlSetValue(ctl, 1);
+        index = FrmGetObjectIndex(formP, lbl8x8);
+        FrmHideObject(formP, index);
+      } else {
+        index = FrmGetObjectIndex(formP, sel6x10);
+        FrmHideObject(formP, index);
+        index = FrmGetObjectIndex(formP, sel8x14);
+        FrmHideObject(formP, index);
+        index = FrmGetObjectIndex(formP, sel8x16);
+        FrmHideObject(formP, index);
       }
-      index = FrmGetObjectIndex(formP, sel);
-      ctl = (ControlType *)FrmGetObjectPtr(formP, index);
-      CtlSetValue(ctl, 1);
       FrmSetGadgetHandler(formP, FrmGetObjectIndex(formP, fgCtl), ColorGadgetCallback);
       FrmSetGadgetHandler(formP, FrmGetObjectIndex(formP, bgCtl), ColorGadgetCallback);
       FrmSetGadgetHandler(formP, FrmGetObjectIndex(formP, hlCtl), ColorGadgetCallback);
@@ -881,12 +885,13 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
     case ctlSelectEvent:
       switch (event->data.ctlSelect.controlID) {
         case dflBtn:
-          idata->prefs.font = DEFAULT_FONT;
+          idata->prefs.font = font8x14Id;
+          if (density != kDensityDouble) idata->prefs.font = font16x16Id;
           idata->prefs.foreground = defaultForeground;
           idata->prefs.background = defaultBackground;
           idata->prefs.highlight  = defaultHighlight;
           formP = FrmGetActiveForm();
-          index = FrmGetObjectIndex(formP, DEFAULT_FONT_SEL);
+          index = FrmGetObjectIndex(formP, sel8x14);
           ctl = (ControlType *)FrmGetObjectPtr(formP, index);
           CtlSetValue(ctl, 1);
           DrawColorGadget(formP, fgCtl, &idata->prefs.foreground);
@@ -895,16 +900,15 @@ static Boolean PrefsFormHandleEvent(EventType *event) {
           break;
         case okBtn:
           formP = FrmGetActiveForm();
-          if (ctlSelected(formP, sel6x10)) {
-            idata->prefs.font = font6x10Id;
-          } else if (ctlSelected(formP, sel8x14)) {
-            idata->prefs.font = font8x14Id;
-          } else if (ctlSelected(formP, sel8x16)) {
-            idata->prefs.font = font8x16Id;
-          } else if (ctlSelected(formP, sel16x16)) {
-            idata->prefs.font = font16x16Id;
+          if (density == kDensityDouble) {
+            if (ctlSelected(formP, sel6x10)) {
+              idata->prefs.font = font6x10Id;
+            } else if (ctlSelected(formP, sel8x14)) {
+              idata->prefs.font = font8x14Id;
+            } else if (ctlSelected(formP, sel8x16)) {
+              idata->prefs.font = font8x16Id;
+            }
           }
-
           PrefSetAppPreferences(AppID, 1, 1, &idata->prefs, sizeof(command_prefs_t), true);
           color = RGBToLong(&idata->prefs.foreground);
           pterm_setfg(idata->t, color);
@@ -1716,7 +1720,7 @@ static void command_load_external_commands(command_internal_data_t *idata) {
 static Err StartApplication(void *param) {
   command_data_t *data;
   command_internal_data_t *idata;
-  UInt32 iterator, swidth, sheight;
+  UInt32 iterator, swidth, sheight, density;
   UInt16 prefsSize;
   FontID font, old;
   uint32_t color;
@@ -1731,7 +1735,7 @@ static Err StartApplication(void *param) {
 
   prefsSize = sizeof(command_prefs_t);
   if (PrefGetAppPreferences(AppID, 1, &idata->prefs, &prefsSize, true) == noPreferenceFound) {
-    idata->prefs.font = DEFAULT_FONT;
+    idata->prefs.font = font8x14Id;
     idata->prefs.foreground = defaultForeground;
     idata->prefs.background = defaultBackground;
     idata->prefs.highlight  = defaultHighlight;
@@ -1746,6 +1750,8 @@ static Err StartApplication(void *param) {
   VFSCurrentDir(1, idata->cwd, MAXCMD);
 
   WinScreenMode(winScreenModeGet, &swidth, &sheight, NULL, NULL);
+  WinScreenGetAttribute(winScreenDensity, &density);
+  if (density != kDensityDouble) idata->prefs.font = font16x16Id;
   font = idata->prefs.font - 9000;
   idata->font = font;
   old = FntSetFont(font);
