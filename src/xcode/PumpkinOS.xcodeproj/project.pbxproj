@@ -1744,7 +1744,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 44C5B7502BCDDB700043DD3E /* App-Debug.xcconfig */;
 			buildSettings = {
-				DEVELOPMENT_TEAM = 3BT8C43J94;
 			};
 			name = Debug;
 		};
@@ -1752,7 +1751,6 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 44C5B7512BCDDB700043DD3E /* App-Release.xcconfig */;
 			buildSettings = {
-				DEVELOPMENT_TEAM = 3BT8C43J94;
 			};
 			name = Release;
 		};
