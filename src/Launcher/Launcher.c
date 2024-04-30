@@ -2066,6 +2066,25 @@ static void DrawBattery(void) {
 
   battery = pumpkin_get_battery();
 
+#if defined(BEEPY) || defined(DARWIN)
+  // BEEPY is (currently) monochromatic, so draw a single-colour battery with a border around it
+  rgb.r = 0x00;
+  rgb.g = 0x40;
+  rgb.b = 0xff;
+  WinSetBackColorRGB(&rgb, &old);
+  RctSetRectangle(&rect, 60, 4, 40, 5);
+  WinEraseRectangle(&rect, 0);
+
+  UInt16 width = (battery * 38) / 100;
+  if (width < 38) {
+    rgb.r = 0xFF;
+    rgb.g = 0xFF;
+    rgb.b = 0xFF;
+    WinSetBackColorRGB(&rgb, NULL);
+    RctSetRectangle(&rect, 61 + width, 5, 38 - width, 3);
+    WinEraseRectangle(&rect, 0);
+  }
+#else
   rgb.r = 0x00;
   rgb.g = 0x40;
   rgb.b = 0xff;
@@ -2082,6 +2101,7 @@ static void DrawBattery(void) {
     rect.extent.x = 40 - rect.extent.x;
     WinEraseRectangle(&rect, 0);
   }
+#endif
 
   WinSetBackColorRGB(&old, NULL);
 }
