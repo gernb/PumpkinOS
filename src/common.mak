@@ -76,6 +76,11 @@ HOSTCC=gcc
 
 ifeq ($(OSNAME),)
 OSNAME := $(shell uname -o)
+ifeq ($(OSNAME),GNU/Linux)
+ifeq ($(shell ls -1 /sys/firmware|grep beepy),beepy)
+OSNAME=Beepy
+endif
+endif
 endif
 
 ifeq ($(OSNAME),GNU/Linux)
