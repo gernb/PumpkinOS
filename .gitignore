@@ -15,6 +15,7 @@
 *.bin
 *.dlib
 *.prc
+*.pdb
 *.log
 res
 zig-cache
