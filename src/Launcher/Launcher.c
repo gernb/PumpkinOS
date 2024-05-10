@@ -2078,16 +2078,17 @@ static void DrawBattery(void) {
   rgb.g = 0x40;
   rgb.b = 0xff;
   WinSetBackColorRGB(&rgb, &old);
-  RctSetRectangle(&rect, 60, 4, 40, 5);
+  UInt16 battery_x = (rect.extent.x - BATTERY_WIDTH) / 2;
+  RctSetRectangle(&rect, battery_x, 4, BATTERY_WIDTH, 5);
   WinEraseRectangle(&rect, 0);
 
-  UInt16 width = (battery * 38) / 100;
-  if (width < 38) {
+  UInt16 width = (battery * (BATTERY_WIDTH - 2)) / 100;
+  if (width < (BATTERY_WIDTH - 2)) {
     rgb.r = 0xFF;
     rgb.g = 0xFF;
     rgb.b = 0xFF;
     WinSetBackColorRGB(&rgb, NULL);
-    RctSetRectangle(&rect, 61 + width, 5, 38 - width, 3);
+    RctSetRectangle(&rect, battery_x + 1 + width, 5, (BATTERY_WIDTH - 2) - width, 3);
     WinEraseRectangle(&rect, 0);
   }
 #else
