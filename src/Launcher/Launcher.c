@@ -36,6 +36,8 @@
 #define BLACK   0x00,0x00,0x00
 #define WHITE   0xFF,0xFF,0xFF
 
+#define BATTERY_WIDTH 40
+
 // When DIA is closed: Title (15) + 6*35 + Taskbar (15) = 240 = 160 + 80
 
 typedef enum {
@@ -2060,9 +2062,13 @@ static void LauncherOpenForm(UInt16 formId) {
 }
 
 static void DrawBattery(void) {
+  FormType *frm;
   RectangleType rect;
   RGBColorType rgb, old;
   UInt16 battery;
+
+  frm = FrmGetActiveForm();
+  FrmGetFormBounds(frm, &rect);
 
   battery = pumpkin_get_battery();
 
@@ -2072,16 +2078,17 @@ static void DrawBattery(void) {
   rgb.g = 0x40;
   rgb.b = 0xff;
   WinSetBackColorRGB(&rgb, &old);
-  RctSetRectangle(&rect, 60, 4, 40, 5);
+  UInt16 battery_x = (rect.extent.x - BATTERY_WIDTH) / 2;
+  RctSetRectangle(&rect, battery_x, 4, BATTERY_WIDTH, 5);
   WinEraseRectangle(&rect, 0);
 
-  UInt16 width = (battery * 38) / 100;
-  if (width < 38) {
+  UInt16 width = (battery * (BATTERY_WIDTH - 2)) / 100;
+  if (width < (BATTERY_WIDTH - 2)) {
     rgb.r = 0xFF;
     rgb.g = 0xFF;
     rgb.b = 0xFF;
     WinSetBackColorRGB(&rgb, NULL);
-    RctSetRectangle(&rect, 61 + width, 5, 38 - width, 3);
+    RctSetRectangle(&rect, battery_x + 1 + width, 5, (BATTERY_WIDTH - 2) - width, 3);
     WinEraseRectangle(&rect, 0);
   }
 #else
@@ -2089,16 +2096,16 @@ static void DrawBattery(void) {
   rgb.g = 0x40;
   rgb.b = 0xff;
   WinSetBackColorRGB(&rgb, &old);
-  RctSetRectangle(&rect, 60, 4, (battery * 40) / 100, 5);
+  RctSetRectangle(&rect, (rect.extent.x - BATTERY_WIDTH) / 2, 4, (battery * BATTERY_WIDTH) / 100, 5);
   WinEraseRectangle(&rect, 0);
 
-  if (rect.extent.x < 40) {
+  if (rect.extent.x < BATTERY_WIDTH) {
     rgb.r = 0x80;
     rgb.g = 0x80;
     rgb.b = 0x80;
     WinSetBackColorRGB(&rgb, NULL);
     rect.topLeft.x += rect.extent.x;
-    rect.extent.x = 40 - rect.extent.x;
+    rect.extent.x = BATTERY_WIDTH - rect.extent.x;
     WinEraseRectangle(&rect, 0);
   }
 #endif
