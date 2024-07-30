@@ -100,7 +100,7 @@ static int AppRegistrySave(AppRegistryType *ar, int i) {
 
   if ((fd = sys_create(path, SYS_WRITE | SYS_TRUNC, 0644)) != -1) {
     debug(DEBUG_INFO, "AppReg", "saving registry creator '%s' id %d seq %d", screator, ar->registry[i].id, ar->registry[i].seq);
-    sys_write(fd, (uint8_t *)ar->registry[i].data, ar->registry[i].size);
+    if (ar->registry[i].data && ar->registry[i].size) sys_write(fd, (uint8_t *)ar->registry[i].data, ar->registry[i].size);
     sys_close(fd);
     r = 0;
   }
@@ -115,7 +115,7 @@ void AppRegistryFinish(AppRegistryType *ar) {
     if (ar->registry) {
       for (i = 0; i < ar->num; i++) {
         AppRegistrySave(ar, i);
-        xfree(ar->registry[i].data);
+        if (ar->registry[i].data) xfree(ar->registry[i].data);
       }
       xfree(ar->registry);
     }
@@ -310,7 +310,7 @@ void AppRegistrySet(AppRegistryType *ar, UInt32 creator, AppRegistryID id, UInt1
       AppRegistryProcess(ar, creator, id, seq, AppRegistryPositionCallback, p, sizeof(AppRegistryPosition), true);
       break;
     case appRegistryNotification:
-      AppRegistryProcess(ar, creator, id, seq, AppRegistryNotificationCallback, p, 0, true);
+      AppRegistryProcess(ar, creator, id, seq, AppRegistryNotificationCallback, p, sizeof(AppRegistryNotification), true);
       break;
     default:
       break;

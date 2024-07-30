@@ -1756,9 +1756,9 @@ uint32_t emupalmos_main(uint16_t launchCode, void *param, uint16_t flags) {
               offset += sd;
               int32_t value;
               get4b((uint32_t *)&value, data, offset);
-              debug(DEBUG_TRACE, "EmuPalmOS", "data xref %2d at 0x%04X: 0x%02X   %5d 0x%04X 0x%08X -> 0x%08X", xr, i-1, b, sd, offset, value, dataStart + dataSize + value);
+              debug(DEBUG_TRACE, "EmuPalmOS", "8-bits data xref %2d at 0x%04X: 0x%02X   %5d 0x%04X 0x%08X -> 0x%08X", xr, i-1, b, sd, offset, value, dataStart + dataSize + value);
               value += dataStart + dataSize;
-              //put4b(value, data, offset); // XXX comment
+              put4b(value, data, offset);
             } else if (b & 0x40) {
               // 16 bits offsets
               uint16_t w = b;
@@ -1776,11 +1776,13 @@ uint32_t emupalmos_main(uint16_t launchCode, void *param, uint16_t flags) {
               offset += sw;
               int32_t value;
               get4b((uint32_t *)&value, data, offset);
-              debug(DEBUG_TRACE, "EmuPalmOS", "data xref %2d at 0x%04X: 0x%04X %5d 0x%04X 0x%08X -> 0x%08X", xr, i-2, w, sw, offset, value, dataStart + dataSize + value);
+              debug(DEBUG_TRACE, "EmuPalmOS", "16-bits data xref %2d at 0x%04X: 0x%04X %5d 0x%04X 0x%08X -> 0x%08X", xr, i-2, w, sw, offset, value, dataStart + dataSize + value);
               value += dataStart + dataSize;
-              //put4b(value, data, offset); // XXX comment
+value = 0;
+              put4b(value, data, offset);
             } else {
               // 24 bits offset ?
+              debug(DEBUG_ERROR, "EmuPalmOS", "24-bits data xref ?");
               //emupalmos_panic("Unsupported 24 bits offset in data xrefs.", EMUPALMOS_INVALID_XREF);
               m = 3;
               break;

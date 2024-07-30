@@ -33,6 +33,7 @@ typedef struct {
   UInt8 patternData[8];
   UnderlineModeType underlineMode; // XXX it is not being used. Change WinDrawChars() to use this attribute.
   UInt16 density, width, height, depth, depth0, coordSys;
+  Boolean nativeCoordSys;
   WinHandle displayWindow;
   WinHandle activeWindow;
   WinHandle drawWindow;
@@ -529,7 +530,7 @@ void WinSetClipingBounds(WinHandle wh, const RectangleType *rP) {
     x2 = rP->extent.x > 0 ? x1 + rP->extent.x - 1 : x1;
     y2 = rP->extent.y > 0 ? y1 + rP->extent.y - 1 : y1;
 
-    if (module->density == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard) {
+    if (module->density == kDensityDouble && module->coordSys == kCoordinatesStandard) {
       x1 = x1 << 1;
       y1 = y1 << 1;
       x2 = x2 << 1;
@@ -578,7 +579,7 @@ void WinGetClip(RectangleType *rP) {
     y1 = module->drawWindow->clippingBounds.top;
     y2 = module->drawWindow->clippingBounds.bottom;
 
-    if (module->density == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard) {
+    if (module->density == kDensityDouble && module->coordSys == kCoordinatesStandard) {
       x1 = x1 >> 1;
       y1 = y1 >> 1;
       x2 = x2 >> 1;
@@ -604,7 +605,7 @@ void WinClipRectangle(RectangleType *rP) {
       x2 = x1 + rP->extent.x - 1;
       y2 = y1 + rP->extent.y - 1;
 
-      if (module->density == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard) {
+      if (module->density == kDensityDouble && module->coordSys == kCoordinatesStandard) {
         x1 = x1 << 1;
         y1 = y1 << 1;
         x2 = (x2 << 1) + 1;
@@ -627,7 +628,7 @@ void WinClipRectangle(RectangleType *rP) {
           y2 = module->drawWindow->clippingBounds.bottom;
         }
 
-        if (module->density == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard) {
+        if (module->density == kDensityDouble && module->coordSys == kCoordinatesStandard) {
           x1 = x1 >> 1;
           y1 = y1 >> 1;
           x2 = x2 >> 1;
@@ -649,11 +650,12 @@ Boolean WinModal(WinHandle winHandle) {
 }
 
 static IndexedColorType getBit(WinHandle wh, Coord x, Coord y, RGBColorType *rgb) {
+  win_module_t *module = (win_module_t *)thread_get(win_key);
   IndexedColorType p = 0;
 
   switch (BmpGetDensity(wh->bitmapP)) {
     case kDensityLow:
-      switch (WinGetCoordinateSystem()) {
+      switch (module->coordSys) {
         case kCoordinatesStandard:
           if (rgb) BmpGetPixelRGB(wh->bitmapP, x, y, rgb);
           else p = BmpGetPixel(wh->bitmapP, x, y);
@@ -665,7 +667,7 @@ static IndexedColorType getBit(WinHandle wh, Coord x, Coord y, RGBColorType *rgb
       }
       break;
     case kDensityDouble:
-      switch (WinGetCoordinateSystem()) {
+      switch (module->coordSys) {
         case kCoordinatesStandard:
           if (rgb) BmpGetPixelRGB(wh->bitmapP, x*2, y*2, rgb);
           else p = BmpGetPixel(wh->bitmapP, x*2, y*2);
@@ -768,11 +770,13 @@ static void dirty_region(Coord x1, Coord y1, Coord x2, Coord y2) {
 #define CLIPW_OK(wh,x,y) CLIP_OK(wh->clippingBounds.left,wh->clippingBounds.right,wh->clippingBounds.top,wh->clippingBounds.bottom,x,y)
 
 static void WinPutBit(WinHandle wh, Coord x, Coord y, UInt32 b, WinDrawOperation mode) {
+  win_module_t *module = (win_module_t *)thread_get(win_key);
+
   //pointTo(&x, &y);
   pointTo(wh->density, &x, &y);
   if (CLIPW_OK(wh, x, y)) {
     //Boolean dbl = BmpGetDensity(wh->bitmapP) == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard;
-    Boolean dbl = wh->density == kDensityDouble && WinGetCoordinateSystem() == kCoordinatesStandard;
+    Boolean dbl = wh->density == kDensityDouble && module->coordSys == kCoordinatesStandard;
     BmpPutBit(b, false, wh->bitmapP, x, y, mode, dbl);
   }
 }
@@ -1549,22 +1553,25 @@ void WinBlitBitmap(BitmapType *bitmapP, WinHandle wh, const RectangleType *rect,
       bitmapDensity = BmpGetDensity(best);
       bitmapDepth = BmpGetBitDepth(best);
       bitmapTransp = BmpGetTransparentValue(best, &transparentValue);
+//debug(1, "XXX", "WinBlitBitmap %d,%d text %d bitmap density %d window density %d", x, y, text, bitmapDensity, windowDensity);
 
 #ifndef ANDROID
       if (bitmapDensity == windowDensity && bitmapDepth == windowDepth && bitmapDepth >= 8 && !bitmapTransp && mode == winPaint && !text) {
         // it is possible to use fast copy
         RctCopyRectangle(rect, &srcRect);
-        coordSys = WinGetCoordinateSystem();
+        coordSys = module->coordSys;
         if (bitmapDensity == kDensityDouble && coordSys == kCoordinatesStandard) {
           WinSetCoordinateSystem(kCoordinatesDouble);
           x = WinScaleCoord(x, false);
           y = WinScaleCoord(y, false);
           WinScaleRectangle(&srcRect);
+//debug(1, "XXX", "WinBlitBitmap fastcopy coord double scale");
         } else if (bitmapDensity == kDensityLow && coordSys == kCoordinatesDouble) {
           WinSetCoordinateSystem(kCoordinatesStandard);
           x = WinUnscaleCoord(x, false);
           y = WinUnscaleCoord(y, false);
           WinUnscaleRectangle(&srcRect);
+//debug(1, "XXX", "WinBlitBitmap fastcopy coord standard unscale");
         }
         WinCopyBitmap(best, wh, &srcRect, x, y);
         WinSetCoordinateSystem(coordSys);
@@ -1574,6 +1581,7 @@ void WinBlitBitmap(BitmapType *bitmapP, WinHandle wh, const RectangleType *rect,
 
       dbl = bitmapDensity == kDensityLow && windowDensity == kDensityDouble;
       hlf = bitmapDensity == kDensityDouble && windowDensity == kDensityLow;
+//debug(1, "XXX", "WinBlitBitmap dbl %d hlf %d", dbl, hlf);
 
       ax = wh->windowBounds.topLeft.x;
       ay = wh->windowBounds.topLeft.y;
@@ -1583,7 +1591,8 @@ void WinBlitBitmap(BitmapType *bitmapP, WinHandle wh, const RectangleType *rect,
       h = rect->extent.y;
       dstX = x;
       dstY = y;
-      coordSys = WinGetCoordinateSystem();
+      coordSys = module->coordSys;
+//debug(1, "XXX", "WinBlitBitmap dst %d,%d coord %d", dstX, dstY, coordSys);
 
       if (bitmapDensity == kDensityLow && coordSys == kCoordinatesDouble) {
         srcX >>= 1;
@@ -1616,9 +1625,11 @@ void WinBlitBitmap(BitmapType *bitmapP, WinHandle wh, const RectangleType *rect,
       if (windowDensity == kDensityLow && coordSys == kCoordinatesDouble) {
         dstX >>= 1;
         dstY >>= 1;
+//debug(1, "XXX", "WinBlitBitmap window density low coord double dst >> %d,%d", dstX, dstY);
       } else if (windowDensity == kDensityDouble && coordSys == kCoordinatesStandard) {
         dstX <<= 1;
         dstY <<= 1;
+//debug(1, "XXX", "WinBlitBitmap window density double coord standard dst << %d,%d", dstX, dstY);
       }
 
       if (dbl) {
@@ -1626,16 +1637,19 @@ void WinBlitBitmap(BitmapType *bitmapP, WinHandle wh, const RectangleType *rect,
         dstX0 = srcX0*2;
         dstIncX = srcIncX*2;
         dstIncY = srcIncY*2;
+//debug(1, "XXX", "WinBlitBitmap dbl");
       } else if (hlf) {
         dstY0 = srcY0/2;
         dstX0 = srcX0/2;
         dstIncX = srcIncX/2;
         dstIncY = srcIncY/2;
+//debug(1, "XXX", "WinBlitBitmap hlf");
       } else {
         dstY0 = srcY0;
         dstX0 = srcX0;
         dstIncX = srcIncX;
         dstIncY = srcIncY;
+//debug(1, "XXX", "WinBlitBitmap normal");
       }
 
       displayBitmap = WinGetBitmap(module->displayWindow);
@@ -1803,9 +1817,11 @@ static void WinDrawCharsC(uint8_t *chars, Int16 len, Coord x, Coord y, int max) 
   Boolean v10;
   RectangleType rect;
   uint16_t ch;
-  uint32_t i, col, index, mult;
+  uint32_t i, col, mult;
+  int32_t index;
 
   if (module->drawWindow && chars && len > 0) {
+//debug(1, "XXX", "WinDrawCharsC(\"%.*s\", %d, %d)", len, chars, x, y);
     x0 = x;
     y0 = y;
     f = FntGetFontPtr();
@@ -1820,22 +1836,26 @@ static void WinDrawCharsC(uint8_t *chars, Int16 len, Coord x, Coord y, int max) 
 
     if (f->v == 1) {
       density = BmpGetDensity(WinGetBitmap(module->drawWindow));
+//debug(1, "XXX", "WinDrawCharsC font v1 density %d", density);
 
       switch (density) {
         case kDensityLow:
           if (module->coordSys == kCoordinatesDouble) {
+//debug(1, "XXX", "WinDrawCharsC window density low font density low coord double x:%d->%d, y:%d->%d", x, x>>1, y, y>>1);
             x >>= 1;
             y >>= 1;
           }
           break;
+/*
         case kDensityDouble:
           if (module->coordSys == kCoordinatesStandard) {
+//debug(1, "XXX", "WinDrawCharsC window density double font density low coord standard x:%d->%d, y:%d->%d", x, x<<1, y, y<<1);
             x <<= 1;
             y <<= 1;
           }
           break;
+*/
       }
-//debug(1, "XXX", "WinDrawCharsC(\"%.*s\", %d, %d) %p v1 density %d", len, chars, x, y, WinGetDrawWindow(), density);
 
       for (i = 0; i < len;) {
         i += pumpkin_next_char(chars, i, &wch);
@@ -1844,6 +1864,7 @@ static void WinDrawCharsC(uint8_t *chars, Int16 len, Coord x, Coord y, int max) 
         if (ch >= f->firstChar && ch <= f->lastChar) {
           col = f->column[ch - f->firstChar];
           RctSetRectangle(&rect, col, 0, f->width[ch - f->firstChar], f->fRectHeight);
+//debug(1, "XXX", "WinDrawCharsC '%c' rect %d,%d %d,%d at %d,%d", ch, rect.topLeft.x, rect.topLeft.y, rect.extent.x, rect.extent.y, x, y);
           WinBlitBitmap(f->bmp, module->drawWindow, &rect, x, y, module->transferMode, true);
           x += f->width[ch - f->firstChar];
         } else {
@@ -1853,50 +1874,66 @@ static void WinDrawCharsC(uint8_t *chars, Int16 len, Coord x, Coord y, int max) 
       }
     } else {
       f2 = (FontTypeV2 *)f;
-      if (f2->densityCount >= 2 && f2->densities[0].density == kDensityLow && f2->densities[1].density == kDensityDouble) {
-        density = BmpGetDensity(WinGetBitmap(module->drawWindow));
-        prev = WinGetCoordinateSystem();
+      density = BmpGetDensity(WinGetBitmap(module->drawWindow));
+      prev = module->coordSys;
+//debug(1, "XXX", "WinDrawCharsC font v2 density %d", density);
 
-        switch (density) {
-          case kDensityLow:
+      switch (density) {
+        case kDensityLow:
+          if (f2->densityCount >= 1 && f2->densities[0].density == kDensityLow) {
             index = 0; // low density font
             mult = 1;
             if (module->coordSys == kCoordinatesDouble) {
+//debug(1, "XXX", "WinDrawCharsC window density low font density low coord double x:%d->%d, y:%d->%d", x, x>>1, y, y>>1);
               x >>= 1;
               y >>= 1;
             }
             WinSetCoordinateSystem(kCoordinatesStandard);
-            break;
-          case kDensityDouble:
+//debug(1, "XXX", "WinDrawCharsC set coord standard");
+          } else {
+            index = -1;
+          }
+          break;
+        case kDensityDouble:
+          if (f2->densityCount >= 2 && f2->densities[1].density == kDensityDouble) {
             index = 1; // double density font
+          } else if (f2->densityCount >= 1 && f2->densities[0].density == kDensityDouble) {
+            index = 0; // double density font
+          } else {
+            index = -1;
+          }
+          if (index >= 0) {
             mult = 2;
             if (module->coordSys == kCoordinatesStandard) {
+//debug(1, "XXX", "WinDrawCharsC window density double font density double coord standard x:%d->%d, y:%d->%d", x, x<<1, y, y<<1);
               x <<= 1;
               y <<= 1;
             }
             WinSetCoordinateSystem(kCoordinatesDouble);
+//debug(1, "XXX", "WinDrawCharsC set coord double");
+          }
             break;
         }
-//debug(1, "XXX", "WinDrawCharsC(\"%.*s\", %d, %d) %p v2 density %d mode %d", len, chars, x, y, WinGetDrawWindow(), density, module->transferMode);
-//debug_bytes(1, "XXX", chars, len);
 
-        for (i = 0; i < len;) {
-          i += pumpkin_next_char(chars, i, &wch);
-          ch = pumpkin_map_char(wch, &f);
-          f2 = (FontTypeV2 *)f;
-          if (v10 && ch == 0x80) ch = 0x19; // numeric space
-          if (ch >= f2->firstChar && ch <= f2->lastChar) {
-            col = f2->column[ch - f2->firstChar]*mult;
-            RctSetRectangle(&rect, col, 0, f2->width[ch - f2->firstChar]*mult, f2->fRectHeight*mult);
-            WinBlitBitmap(f2->bmp[index], module->drawWindow, &rect, x, y, module->transferMode, true);
-            x += f2->width[ch - f2->firstChar]*mult;
-          } else {
-            debug(DEBUG_ERROR, "Window", "missing symbol 0x%04X", wch);
-            x += MISSING_SYMBOL_WIDTH;
+        if (index >= 0) {
+          for (i = 0; i < len;) {
+            i += pumpkin_next_char(chars, i, &wch);
+            ch = pumpkin_map_char(wch, &f);
+            f2 = (FontTypeV2 *)f;
+            if (v10 && ch == 0x80) ch = 0x19; // numeric space
+            if (ch >= f2->firstChar && ch <= f2->lastChar) {
+              col = f2->column[ch - f2->firstChar]*mult;
+              RctSetRectangle(&rect, col, 0, f2->width[ch - f2->firstChar]*mult, f2->fRectHeight*mult);
+//debug(1, "XXX", "WinDrawCharsC '%c' rect %d,%d %d,%d at %d,%d", ch, rect.topLeft.x, rect.topLeft.y, rect.extent.x, rect.extent.y, x, y);
+              WinBlitBitmap(f2->bmp[index], module->drawWindow, &rect, x, y, module->transferMode, true);
+              x += f2->width[ch - f2->firstChar]*mult;
+            } else {
+              debug(DEBUG_ERROR, "Window", "missing symbol 0x%04X", wch);
+              x += MISSING_SYMBOL_WIDTH;
+            }
           }
+          WinSetCoordinateSystem(prev);
         }
-        WinSetCoordinateSystem(prev);
-      }
     }
 
     if (module->drawWindow == module->activeWindow) {
@@ -2343,7 +2380,7 @@ UInt16 WinSetCoordinateSystem(UInt16 coordSys) {
   UInt16 prev;
 
   debug(DEBUG_TRACE, "Window", "WinSetCoordinateSystem %d", coordSys);
-  prev = module->coordSys;
+  prev = module->nativeCoordSys ? kCoordinatesNative : module->coordSys;
 
   switch (coordSys) {
      case kCoordinatesNative:
@@ -2351,13 +2388,16 @@ UInt16 WinSetCoordinateSystem(UInt16 coordSys) {
          case kDensityLow:       module->coordSys = kCoordinatesStandard;  break;
          case kDensityDouble:    module->coordSys = kCoordinatesDouble;    break;
        }
+       module->nativeCoordSys = true;
        break;
      case kCoordinatesStandard:
        module->coordSys = coordSys;
+       module->nativeCoordSys = false;
        break;
      case kCoordinatesDouble:
        if (module->density == kDensityDouble) {
          module->coordSys = coordSys;
+         module->nativeCoordSys = false;
        }
        break;
      default:
@@ -2370,6 +2410,11 @@ UInt16 WinSetCoordinateSystem(UInt16 coordSys) {
 }
 
 UInt16 WinGetCoordinateSystem(void) {
+  win_module_t *module = (win_module_t *)thread_get(win_key);
+  return module->nativeCoordSys ? kCoordinatesNative : module->coordSys;
+}
+
+UInt16 WinGetRealCoordinateSystem(void) {
   win_module_t *module = (win_module_t *)thread_get(win_key);
   return module->coordSys;
 }

@@ -323,6 +323,7 @@ void WinLegacyWriteByte(UInt32 offset, UInt8 value);
 void WinLegacyWriteWord(UInt32 offset, UInt16 value);
 void WinLegacyWriteLong(UInt32 offset, UInt32 value);
 Int16 WinGetBorderRect(WinHandle wh, RectangleType *rect);
+UInt16 WinGetRealCoordinateSystem(void);
 surface_t *WinCreateSurface(WinHandle wh, RectangleType *rect);
 
 int PrefInitModule(void);
@@ -394,6 +395,8 @@ void RctAbsToRect(const AbsRectType *arP, RectangleType *rP);
 UInt16 RctGetDifference(const RectangleType *a, const RectangleType *b, RectangleType *r);
 void RctGetUnion(const RectangleType *a, const RectangleType *b, RectangleType *r);
 
+FontPtr FntCopyFont(FontPtr f);
+void FntFreeFont(FontPtr f);
 void FntSaveFonts(void);
 
 Err HwrGetROMToken(UInt16 cardNo, UInt32 token, UInt8 **dataP, UInt16 *sizeP);

@@ -217,7 +217,6 @@ typedef struct {
   notif_registration_t notif[MAX_NOTIF_REGISTER];
   int num_notif;
   FontTypeV2 *fontPtr[128];
-  MemHandle fontHandle[128];
   event_t events[MAX_EVENTS];
   int nev, iev, oev;
   calibration_t calibration;
@@ -480,7 +479,7 @@ static void SysNotifyLoadCallback(UInt32 creator, UInt16 index, UInt16 id, void 
 FontTypeV2 *pumpkin_get_font(FontID fontId) {
   FontTypeV2 *fontv2 = NULL;
 
-  if (fontId >= 0 && fontId < 128 && pumpkin_module.fontHandle[fontId] && pumpkin_module.fontPtr[fontId]) {
+  if (fontId >= 0 && fontId < 128 && pumpkin_module.fontPtr[fontId]) {
     fontv2 = pumpkin_module.fontPtr[fontId];
   }
 
@@ -489,17 +488,19 @@ FontTypeV2 *pumpkin_get_font(FontID fontId) {
 
 static void pumpkin_load_fonts(void) {
   UInt16 index, fontId, resId;
+  MemHandle handle;
+  FontPtr f;
 
   for (index = 0; systemFonts[index] >= 0; index++) {
     fontId = systemFonts[index];
     resId = FONT_BASE + fontId;
 
-    if ((pumpkin_module.fontHandle[fontId] = DmGetResource(fontExtRscType, resId)) != NULL) {
-      if ((pumpkin_module.fontPtr[fontId] = MemHandleLock(pumpkin_module.fontHandle[fontId])) == NULL) {
-        debug(DEBUG_ERROR, PUMPKINOS, "error locking built-in nfnt %d font resource", resId);
-        DmReleaseResource(pumpkin_module.fontHandle[fontId]);
-        pumpkin_module.fontHandle[fontId] = NULL;
+    if ((handle = DmGetResource(fontExtRscType, resId)) != NULL) {
+      if ((f = MemHandleLock(handle)) != NULL) {
+        pumpkin_module.fontPtr[fontId] = (FontTypeV2 *)FntCopyFont(f);
+        MemHandleUnlock(handle);
       }
+      DmReleaseResource(handle);
     } else {
       debug(DEBUG_ERROR, PUMPKINOS, "built-in nfnt %d font resource not found", fontId);
     }
@@ -511,12 +512,7 @@ static void pumpkin_unload_fonts(void) {
 
   for (fontId = 0; fontId < 128; fontId++) {
     if (pumpkin_module.fontPtr[fontId]) {
-      MemHandleUnlock(pumpkin_module.fontHandle[fontId]);
-      pumpkin_module.fontPtr[fontId] = NULL;
-    }
-    if (pumpkin_module.fontHandle[fontId]) {
-      DmReleaseResource(pumpkin_module.fontHandle[fontId]);
-      pumpkin_module.fontHandle[fontId] = NULL;
+      FntFreeFont((FontPtr)pumpkin_module.fontPtr[fontId]);
     }
   }
 }
@@ -648,6 +644,7 @@ void pumpkin_init_boot_file(void) {
 void pumpkin_set_spawner(int handle) {
   debug(DEBUG_INFO, PUMPKINOS, "spawner set to port %d", handle);
   pumpkin_module.spawner = handle;
+  wman_clear(pumpkin_module.wm);
 }
 
 int pumpkin_is_spawner(void) {
@@ -1747,6 +1744,9 @@ uint32_t pumpkin_launch_request(char *name, UInt16 cmd, UInt8 *param, UInt16 fla
       }
       creq.data.launch.param = gotoParam;
       break;
+    case sysAppLaunchCmdPanelCalledFromApp:
+      debug(DEBUG_ERROR, PUMPKINOS, "sysAppLaunchCmdPanelCalledFromApp not supported");
+      return r;
     default:
       debug(DEBUG_INFO, PUMPKINOS, "sending launch code %d to \"%s\"", cmd, name);
       handle = pumpkin_pause_task(name, &call_sub);

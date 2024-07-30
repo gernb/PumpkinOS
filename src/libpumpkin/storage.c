@@ -104,6 +104,7 @@ typedef struct {
   UInt32 comparF68K;
   Int16 other;
   LocalID watchID;
+  storage_db_t *tmpDb;
 } storage_t;
 
 static void StoDecodeResource(storage_handle_t *res);
@@ -634,7 +635,6 @@ void StoRemoveLocks(char *path) {
         if (ent == NULL) break;
         if (ent->type != VFS_DIR) continue;
         if (ent->name[0] == '.') continue;
-        if (sys_strlen(ent->name) >= dmDBNameLength) continue;
         sys_snprintf(buf, VFS_PATH-1, "%s%s/lock", path, ent->name);
         StoVfsUnlink(session, buf);
       }
@@ -1976,7 +1976,7 @@ static MemHandle DmGetResourceEx(DmResType type, DmResID resID, Boolean firstOnl
       for (i = 0; i < db->numRecs; i++) {
         h = db->elements[i];
         pumpkin_id2s(h->d.res.type, st);
-        debug(DEBUG_TRACE, "STOR", "DmGetResourceEx resource %d: %s %d", i, st, resID);
+        debug(DEBUG_TRACE, "STOR", "DmGetResourceEx resource %d: %s %d", i, st, h->d.res.id);
         if (h->d.res.type == type && h->d.res.id == resID) {
           debug(DEBUG_TRACE, "STOR", "DmGetResourceEx found resource %s %d inflated %d on \"%s\"", st, resID, (h->htype & STO_INFLATED) ? 1 : 0, db->name);
           found = 1;
@@ -2072,7 +2072,6 @@ UInt16 DmSearchResource(DmResType resType, DmResID resID, MemHandle resH, DmOpen
           debug(DEBUG_TRACE, "STOR", "found resource at index %d", i);
           index = i;
           *dbPP = dbRef;
-          found = true;
 
           if (!(h->htype & STO_INFLATED)) {
             if ((h->buf = StoPtrNew(h, h->size, resType, resID)) != NULL) {
@@ -2116,6 +2115,74 @@ UInt16 DmSearchResource(DmResType resType, DmResID resID, MemHandle resH, DmOpen
       }
       err = errNone;
     }
+    mutex_unlock(sto->mutex);
+  }
+
+  StoCheckErr(err);
+  return index;
+}
+
+UInt16 DmSearchRecord(MemHandle recH, DmOpenRef *dbPP) {
+  storage_t *sto = (storage_t *)thread_get(sto_key);
+  storage_db_t *db;
+  DmOpenType *dbRef;
+  vfs_file_t *f;
+  UInt16 index = 0xffff;
+  Boolean found;
+  char buf[VFS_PATH];
+  uint32_t i;
+  storage_handle_t *h = NULL;
+  Err err = dmErrResourceNotFound;
+
+  if (recH && dbPP && mutex_lock(sto->mutex) == 0) {
+    debug(DEBUG_TRACE, "STOR", "searching record handle %p", recH);
+
+    for (dbRef = sto->dbRef, found = false; dbRef && !found; dbRef = dbRef->next) {
+      if (dbRef->dbID >= (sto->size - sizeof(storage_db_t))) continue;
+      db = (storage_db_t *)(sto->base + dbRef->dbID);
+      if (db->ftype != STO_TYPE_REC) continue;
+
+      debug(DEBUG_TRACE, "STOR", "checking database \"%s\" (%d resources)", db->name, db->numRecs);
+      for (i = 0; i < db->numRecs; i++) {
+        h = db->elements[i];
+        found = (h == recH);
+        if (found) {
+          debug(DEBUG_TRACE, "STOR", "found record at index %d", i);
+          index = i;
+          *dbPP = dbRef;
+
+          if (!(h->htype & STO_INFLATED)) {
+            if ((h->buf = StoPtrNew(h, h->size, 0, 0)) != NULL) {
+              h->htype |= STO_INFLATED;
+              h->useCount = 1;
+              debug(DEBUG_TRACE, "STOR", "reading record %d at %p", i, h->buf);
+              storage_name(sto, db->name, STO_FILE_ELEMENT, 0, 0, h->d.rec.attr & ATTR_MASK, h->d.rec.uniqueID, buf);
+              if ((f = StoVfsOpen(sto->session, buf, VFS_READ)) != NULL) {
+                if (vfs_read(f, h->buf, h->size) == h->size) {
+                  h->d.rec.attr &= ~dmRecAttrDirty;
+                  h->d.rec.attr |= dmRecAttrBusy;
+                  h->lockCount = 0;
+                  err = errNone;
+                } else {
+                  h = NULL;
+                }
+                vfs_close(f);
+              } else {
+                h = NULL;
+              }
+            } else {
+              h = NULL;
+            }
+          } else {
+            h->useCount++;
+            err = errNone;
+          }
+
+          break;
+        }
+      }
+    }
+
     mutex_unlock(sto->mutex);
   }
 
@@ -2751,6 +2818,8 @@ MemHandle DmResizeRecord(DmOpenRef dbP, UInt16 index, UInt32 newSize) {
   storage_db_t *db;
   DmOpenType *dbRef;
   void *p;
+  vfs_file_t *f;
+  char buf[VFS_PATH];
   storage_handle_t *h = NULL;
   Err err = dmErrInvalidParam;
 
@@ -2763,10 +2832,22 @@ MemHandle DmResizeRecord(DmOpenRef dbP, UInt16 index, UInt32 newSize) {
         if (h->htype & STO_INFLATED) {
           p = StoPtrNew(h, newSize, 0, 0);
           MemMove(p, h->buf, newSize < h->size ? newSize : h->size);
+          StoPtrFree(h->buf);
           h->buf = p;
+        } else {
+          if ((h->buf = StoPtrNew(h, newSize, 0, 0)) != NULL) {
+            h->htype |= STO_INFLATED;
+            h->useCount = 1;
+            storage_name(sto, db->name, STO_FILE_ELEMENT, 0, 0, h->d.rec.attr & ATTR_MASK, h->d.rec.uniqueID, buf);
+            if ((f = StoVfsOpen(sto->session, buf, VFS_READ)) != NULL) {
+              vfs_read(f, h->buf, newSize < h->size ? newSize : h->size);
+              vfs_close(f);
+            }
+            h->lockCount = 0;
+          }
         }
         h->size = newSize;
-        h->d.rec.attr &= ~dmRecAttrDirty;
+        h->d.rec.attr |= dmRecAttrDirty;
         db->modDate = TimGetSeconds();
         err = errNone;
       }
@@ -5016,6 +5097,10 @@ static int StoCompareHandle(const void *e1, const void *e2) {
   storage_t *sto = (storage_t *)thread_get(sto_key);
   storage_handle_t *h1, *h2;
   SortRecordInfoType r1, r2;
+  UInt8 *b1, *b2;
+  Boolean free1, free2;
+  vfs_file_t *f;
+  char buf[VFS_PATH];
   UInt8 *b;
   UInt32 a;
   int r = 0;
@@ -5023,6 +5108,32 @@ static int StoCompareHandle(const void *e1, const void *e2) {
   if (e1 && e2 && (sto->comparF || sto->comparF68K)) {
     h1 = *(storage_handle_t **)e1;
     h2 = *(storage_handle_t **)e2;
+
+    b1 = h1->buf;
+    free1 = false;
+    if (b1 == NULL) {
+      if ((b1 = pumpkin_heap_alloc(h1->size, "TmpHandleBuf")) != NULL) {
+        storage_name(sto, sto->tmpDb->name, STO_FILE_ELEMENT, 0, 0, h1->d.rec.attr & ATTR_MASK, h1->d.rec.uniqueID, buf);
+        if ((f = StoVfsOpen(sto->session, buf, VFS_READ)) != NULL) {
+          vfs_read(f, b1, h1->size);
+          vfs_close(f);
+        }
+        free1 = true;
+      }
+    }
+
+    b2 = h2->buf;
+    free2 = false;
+    if (b2 == NULL) {
+      if ((b2 = pumpkin_heap_alloc(h2->size, "TmpHandleBuf")) != NULL) {
+        storage_name(sto, sto->tmpDb->name, STO_FILE_ELEMENT, 0, 0, h2->d.rec.attr & ATTR_MASK, h2->d.rec.uniqueID, buf);
+        if ((f = StoVfsOpen(sto->session, buf, VFS_READ)) != NULL) {
+          vfs_read(f, b2, h2->size);
+          vfs_close(f);
+        }
+        free2 = true;
+      }
+    }
 
     if (sto->comparF) {
       r1.attributes = h1->d.rec.attr;
@@ -5035,7 +5146,7 @@ static int StoCompareHandle(const void *e1, const void *e2) {
       r2.uniqueID[1] = (h2->d.rec.uniqueID >>  8) & 0xFF;
       r2.uniqueID[2] = (h2->d.rec.uniqueID >>  0) & 0xFF;
 
-      r = sto->comparF(h1->buf, h2->buf, sto->other, &r1, &r2, sto->appInfoH);
+      r = sto->comparF(b1, b2, sto->other, &r1, &r2, sto->appInfoH);
 
     } else if (sto->comparF68K) {
       sto->recInfo[0] = h1->d.rec.attr;
@@ -5050,8 +5161,11 @@ static int StoCompareHandle(const void *e1, const void *e2) {
 
       b = sto->base;
       a = sto->appInfoH ? (UInt8 *)sto->appInfoH - b : 0;
-      r = CallDmCompare(sto->comparF68K, h1->buf ? h1->buf - b : 0, h2->buf ? h2->buf - b : 0, sto->other, &sto->recInfo[0] - b, &sto->recInfo[4] - b, a);
+      r = CallDmCompare(sto->comparF68K, b1 ? b1 - b : 0, b2 ? b2 - b : 0, sto->other, &sto->recInfo[0] - b, &sto->recInfo[4] - b, a);
     }
+
+    if (free1) pumpkin_heap_free(b1, "TmpHandleBuf");
+    if (free2) pumpkin_heap_free(b2, "TmpHandleBuf");
   }
 
   return r;
@@ -5079,8 +5193,10 @@ static Err StoSort(DmOpenRef dbP, DmComparF *comparF, UInt32 comparF68K, Int16 o
             sto->comparF68K = comparF68K;
             sto->other = other;
             sto->appInfoH = db->appInfoID ? MemLocalIDToHandle(db->appInfoID) : NULL;
+            sto->tmpDb = db;
             debug(DEBUG_INFO, "STOR", "StoSort sorting database \"%s\" with %d records (%s)", db->name, db->numRecs, comparF ? "native" : "68K");
             sys_qsort(db->elements, db->numRecs, sizeof(storage_handle_t *), StoCompareHandle);
+            sto->tmpDb = NULL;
             sto->comparF = NULL;
             sto->comparF68K = 0;
             sto->other = 0;
